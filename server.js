@@ -1,102 +1,58 @@
+import express from "express";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
 
-const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
-const xml2js = require("xml2js");
+dotenv.config();
 
 const app = express();
-app.use(cors());
-
 const PORT = process.env.PORT || 10000;
-const CHANNEL_ID = "UCHut-IQXip7mtXyC3GOiQ1A";
 
-// Country center coordinates (NO external API calls)
-const COUNTRY_DB = {
-  "Egypt": { lat: 26.8206, lng: 30.8025 },
-  "Mexico": { lat: 23.6345, lng: -102.5528 },
-  "Turkey": { lat: 38.9637, lng: 35.2433 },
-  "Japan": { lat: 36.2048, lng: 138.2529 },
-  "China": { lat: 35.8617, lng: 104.1954 },
-  "India": { lat: 20.5937, lng: 78.9629 },
-  "Italy": { lat: 41.8719, lng: 12.5674 },
-  "Spain": { lat: 40.4637, lng: -3.7492 },
-  "Greece": { lat: 39.0742, lng: 21.8243 },
-  "Germany": { lat: 51.1657, lng: 10.4515 },
-  "France": { lat: 46.2276, lng: 2.2137 },
-  "United Kingdom": { lat: 55.3781, lng: -3.4360 },
-  "United States": { lat: 37.0902, lng: -95.7129 }
+const countries = {
+  "egypt": { lat: 26.8206, lng: 30.8025 },
+  "misir": { lat: 26.8206, lng: 30.8025 },
+
+  "china": { lat: 35.8617, lng: 104.1954 },
+  "cin": { lat: 35.8617, lng: 104.1954 },
+
+  "mexico": { lat: 23.6345, lng: -102.5528 },
+  "meksika": { lat: 23.6345, lng: -102.5528 },
+
+  "puerto rico": { lat: 18.2208, lng: -66.5901 },
+  "porto riko": { lat: 18.2208, lng: -66.5901 }
 };
 
-// Turkish + English country mapping
-const COUNTRY_MAP = {
-  "mısır": "Egypt",
-  "misir": "Egypt",
-  "egypt": "Egypt",
+const countryNamesTR = {
+  "egypt": "Mısır",
+  "misir": "Mısır",
 
-  "meksika": "Mexico",
-  "mexico": "Mexico",
+  "china": "Çin",
+  "cin": "Çin",
 
-  "türkiye": "Turkey",
-  "turkiye": "Turkey",
-  "turkey": "Turkey",
+  "mexico": "Meksika",
+  "meksika": "Meksika",
 
-  "japonya": "Japan",
-  "japan": "Japan",
-
-  "çin": "China",
-  "cin": "China",
-  "china": "China",
-
-  "hindistan": "India",
-  "india": "India",
-
-  "italya": "Italy",
-  "italy": "Italy",
-
-  "ispanya": "Spain",
-  "spain": "Spain",
-
-  "yunanistan": "Greece",
-  "greece": "Greece",
-
-  "almanya": "Germany",
-  "germany": "Germany",
-
-  "fransa": "France",
-  "france": "France",
-
-  "ingiltere": "United Kingdom",
-  "uk": "United Kingdom",
-  "united kingdom": "United Kingdom",
-
-  "amerika": "United States",
-  "abd": "United States",
-  "usa": "United States",
-  "united states": "United States"
+  "puerto rico": "Porto Riko",
+  "porto riko": "Porto Riko"
 };
 
-function normalize(text){
+function normalize(text) {
   return text
     .toLowerCase()
-    .replace(/ç/g,"c")
-    .replace(/ğ/g,"g")
-    .replace(/ı/g,"i")
-    .replace(/ö/g,"o")
-    .replace(/ş/g,"s")
-    .replace(/ü/g,"u");
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
-function extractVideoId(link){
-  const match = link.match(/v=([^&]+)/);
-  return match ? match[1] : null;
-}
+function detectCountry(text) {
+  const clean = normalize(text);
 
-function detectCountry(text){
-  const normalized = normalize(text);
-
-  for(const key in COUNTRY_MAP){
-    if(normalized.includes(normalize(key))){
-      return COUNTRY_MAP[key];
+  for (const name in countries) {
+    const regex = new RegExp(`\\b${name}\\b`, "i");
+    if (regex.test(clean)) {
+      return {
+        lat: countries[name].lat,
+        lng: countries[name].lng,
+        location: countryNamesTR[name] || name
+      };
     }
   }
 
@@ -104,57 +60,40 @@ function detectCountry(text){
 }
 
 app.get("/api/videos", async (req, res) => {
+  try {
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    const channelId = process.env.YOUTUBE_CHANNEL_ID;
 
-  try{
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=20`;
 
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
-    const rssRes = await fetch(rssUrl);
-    const xml = await rssRes.text();
+    const response = await fetch(url);
+    const data = await response.json();
 
-    const parser = new xml2js.Parser({ explicitArray: true });
-    const result = await parser.parseStringPromise(xml);
+    const results = [];
 
-    const entries = result.feed.entry || [];
-    const videos = [];
+    data.items.forEach(video => {
+      if (!video.id.videoId) return;
 
-    for(const entry of entries){
+      const text = video.snippet.title + " " + video.snippet.description;
+      const detected = detectCountry(text);
 
-      const title = entry.title[0] || "";
-      const link = entry.link[0].$.href;
-      const videoId = extractVideoId(link);
-      if(!videoId) continue;
-
-      let description = "";
-      if(entry["media:group"] && entry["media:group"][0]["media:description"]){
-        description = entry["media:group"][0]["media:description"][0];
+      if (detected) {
+        results.push({
+          id: video.id.videoId,
+          lat: detected.lat,
+          lng: detected.lng,
+          location: detected.location
+        });
       }
+    });
 
-      const combinedText = title + " " + description;
+    res.json(results);
 
-      const country = detectCountry(combinedText);
-      if(!country) continue;
-
-      const coords = COUNTRY_DB[country];
-      if(!coords) continue;
-
-      videos.push({
-        id: videoId,
-        lat: coords.lat,
-        lng: coords.lng,
-        location: country
-      });
-
-    }
-
-    res.json(videos);
-
-  }catch(err){
-    console.error(err);
-    res.status(500).json({error:"Failed"});
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on port " + PORT);
 });
