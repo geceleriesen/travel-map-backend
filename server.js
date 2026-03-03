@@ -10,6 +10,23 @@ app.use(cors());
 const PORT = process.env.PORT || 10000;
 const CHANNEL_ID = "UCHut-IQXip7mtXyC3GOiQ1A";
 
+// Country center coordinates (NO external API calls)
+const COUNTRY_DB = {
+  "Egypt": { lat: 26.8206, lng: 30.8025 },
+  "Mexico": { lat: 23.6345, lng: -102.5528 },
+  "Turkey": { lat: 38.9637, lng: 35.2433 },
+  "Japan": { lat: 36.2048, lng: 138.2529 },
+  "China": { lat: 35.8617, lng: 104.1954 },
+  "India": { lat: 20.5937, lng: 78.9629 },
+  "Italy": { lat: 41.8719, lng: 12.5674 },
+  "Spain": { lat: 40.4637, lng: -3.7492 },
+  "Greece": { lat: 39.0742, lng: 21.8243 },
+  "Germany": { lat: 51.1657, lng: 10.4515 },
+  "France": { lat: 46.2276, lng: 2.2137 },
+  "United Kingdom": { lat: 55.3781, lng: -3.4360 },
+  "United States": { lat: 37.0902, lng: -95.7129 }
+};
+
 // Turkish + English country mapping
 const COUNTRY_MAP = {
   "mısır": "Egypt",
@@ -86,22 +103,6 @@ function detectCountry(text){
   return null;
 }
 
-async function geocodeCountry(country){
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(country)}`;
-  const res = await fetch(url, { headers: { "User-Agent": "travel-map-app" } });
-  const data = await res.json();
-
-  if(data.length > 0){
-    return {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon),
-      name: country
-    };
-  }
-
-  return null;
-}
-
 app.get("/api/videos", async (req, res) => {
 
   try{
@@ -123,7 +124,6 @@ app.get("/api/videos", async (req, res) => {
       const videoId = extractVideoId(link);
       if(!videoId) continue;
 
-      // Get description if exists
       let description = "";
       if(entry["media:group"] && entry["media:group"][0]["media:description"]){
         description = entry["media:group"][0]["media:description"][0];
@@ -134,14 +134,14 @@ app.get("/api/videos", async (req, res) => {
       const country = detectCountry(combinedText);
       if(!country) continue;
 
-      const geo = await geocodeCountry(country);
-      if(!geo) continue;
+      const coords = COUNTRY_DB[country];
+      if(!coords) continue;
 
       videos.push({
         id: videoId,
-        lat: geo.lat,
-        lng: geo.lng,
-        location: geo.name
+        lat: coords.lat,
+        lng: coords.lng,
+        location: country
       });
 
     }
