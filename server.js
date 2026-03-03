@@ -11,40 +11,36 @@ app.use(cors());
 const PORT = process.env.PORT || 10000;
 
 /* ===========================
-   COUNTRY + CITY DATABASE
+   COUNTRY DATABASE
 =========================== */
 
 const locations = {
-  // EGYPT
   "egypt": { lat: 26.8206, lng: 30.8025, tr: "Mısır" },
   "misir": { lat: 26.8206, lng: 30.8025, tr: "Mısır" },
   "kahire": { lat: 30.0444, lng: 31.2357, tr: "Mısır" },
   "gize": { lat: 29.9773, lng: 31.1325, tr: "Mısır" },
 
-  // MEXICO
   "mexico": { lat: 23.6345, lng: -102.5528, tr: "Meksika" },
   "meksika": { lat: 23.6345, lng: -102.5528, tr: "Meksika" },
-  "cancun": { lat: 21.1619, lng: -86.8515, tr: "Meksika" },
 
-  // CHINA
   "china": { lat: 35.8617, lng: 104.1954, tr: "Çin" },
   "cin": { lat: 35.8617, lng: 104.1954, tr: "Çin" },
-  "beijing": { lat: 39.9042, lng: 116.4074, tr: "Çin" },
 
-  // PUERTO RICO
   "puerto rico": { lat: 18.2208, lng: -66.5901, tr: "Porto Riko" },
   "porto riko": { lat: 18.2208, lng: -66.5901, tr: "Porto Riko" },
-  "san juan": { lat: 18.4655, lng: -66.1057, tr: "Porto Riko" },
 
-  // TURKEY
   "turkey": { lat: 39.9208, lng: 32.8541, tr: "Türkiye" },
   "turkiye": { lat: 39.9208, lng: 32.8541, tr: "Türkiye" },
   "istanbul": { lat: 41.0082, lng: 28.9784, tr: "Türkiye" }
 };
 
-/* ===========================
-   TEXT NORMALIZER
-=========================== */
+const flagMap = {
+  "🇪🇬": locations["egypt"],
+  "🇲🇽": locations["mexico"],
+  "🇨🇳": locations["china"],
+  "🇵🇷": locations["puerto rico"],
+  "🇹🇷": locations["turkey"]
+};
 
 function normalize(text) {
   return text
@@ -53,13 +49,21 @@ function normalize(text) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-/* ===========================
-   LOCATION DETECTOR
-=========================== */
-
 function detectLocation(text) {
   const clean = normalize(text);
 
+  // 1️⃣ Flag detection
+  for (const flag in flagMap) {
+    if (text.includes(flag)) {
+      return {
+        lat: flagMap[flag].lat,
+        lng: flagMap[flag].lng,
+        location: flagMap[flag].tr
+      };
+    }
+  }
+
+  // 2️⃣ Keyword detection
   for (const key in locations) {
     const regex = new RegExp(`\\b${key}\\b`, "i");
     if (regex.test(clean)) {
@@ -70,11 +74,12 @@ function detectLocation(text) {
       };
     }
   }
+
   return null;
 }
 
 /* ===========================
-   API ENDPOINT
+   API
 =========================== */
 
 app.get("/api/videos", async (req, res) => {
@@ -83,43 +88,46 @@ app.get("/api/videos", async (req, res) => {
     const channelId = process.env.YOUTUBE_CHANNEL_ID;
 
     if (!apiKey || !channelId) {
-      return res.status(500).json({ error: "Missing environment variables" });
+      return res.status(500).json({ error: "Missing env variables" });
     }
 
-    const url =
-      `https://www.googleapis.com/youtube/v3/search?` +
-      `key=${apiKey}` +
-      `&channelId=${channelId}` +
-      `&part=snippet,id` +
-      `&order=date` +
-      `&maxResults=50`;
+    // 1️⃣ Get uploads playlist ID
+    const channelRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`
+    );
 
-    const response = await fetch(url);
-    const data = await response.json();
+    const channelData = await channelRes.json();
 
-    if (!data.items) {
-      return res.json([]);
-    }
+    const uploadsPlaylist =
+      channelData.items[0].contentDetails.relatedPlaylists.uploads;
+
+    // 2️⃣ Get last 50 uploads
+    const videosRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsPlaylist}&key=${apiKey}`
+    );
+
+    const videosData = await videosRes.json();
 
     const results = [];
 
-    data.items.forEach(video => {
-      if (!video.id.videoId) return;
+    for (const item of videosData.items) {
+      const videoId = item.snippet.resourceId.videoId;
+      const title = item.snippet.title;
+      const description = item.snippet.description;
 
-      const combinedText =
-        video.snippet.title + " " + video.snippet.description;
+      const combined = title + " " + description;
 
-      const detected = detectLocation(combinedText);
+      const detected = detectLocation(combined);
 
       if (detected) {
         results.push({
-          id: video.id.videoId,
+          id: videoId,
           lat: detected.lat,
           lng: detected.lng,
           location: detected.location
         });
       }
-    });
+    }
 
     res.json(results);
 
@@ -128,10 +136,6 @@ app.get("/api/videos", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-/* ===========================
-   START SERVER
-=========================== */
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
