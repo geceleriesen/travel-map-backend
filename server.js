@@ -1,10 +1,13 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
+
 const PORT = process.env.PORT || 10000;
 
 const countries = {
@@ -24,13 +27,10 @@ const countries = {
 const countryNamesTR = {
   "egypt": "Mısır",
   "misir": "Mısır",
-
   "china": "Çin",
   "cin": "Çin",
-
   "mexico": "Meksika",
   "meksika": "Meksika",
-
   "puerto rico": "Porto Riko",
   "porto riko": "Porto Riko"
 };
@@ -55,7 +55,6 @@ function detectCountry(text) {
       };
     }
   }
-
   return null;
 }
 
@@ -64,7 +63,10 @@ app.get("/api/videos", async (req, res) => {
     const apiKey = process.env.YOUTUBE_API_KEY;
     const channelId = process.env.YOUTUBE_CHANNEL_ID;
 
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=20`;
+    const url =
+      `https://www.googleapis.com/youtube/v3/search?` +
+      `key=${apiKey}&channelId=${channelId}` +
+      `&part=snippet,id&order=date&maxResults=20`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -90,6 +92,7 @@ app.get("/api/videos", async (req, res) => {
     res.json(results);
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
