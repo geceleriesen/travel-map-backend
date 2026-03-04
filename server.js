@@ -1,119 +1,71 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import fetch from "node-fetch"
+import fs from "fs"
+
+import {getChannelVideos} from "./youtube.js"
+import {detectLocation} from "./locationAI.js"
+import {geocode} from "./geocode.js"
 
 dotenv.config()
 
 const app = express()
 app.use(cors())
 
-const API = "https://www.googleapis.com/youtube/v3"
-const PORT = 10000
+const PORT=10000
 
+let cache=[]
 
-async function getAllVideos(){
+async function buildMap(){
 
-let pageToken=""
-let videos=[]
+console.log("Scanning channel videos...")
 
-do{
+const videos = await getChannelVideos()
 
-const res = await fetch(
+for(const v of videos){
 
-`${API}/search?key=${process.env.YOUTUBE_API_KEY}
-&channelId=${process.env.YOUTUBE_CHANNEL_ID}
-&part=snippet,id
-&order=date
-&maxResults=50
-&type=video
-&pageToken=${pageToken}`
-
+const place = detectLocation(
+v.title + " " + v.description
 )
 
-const data = await res.json()
+if(!place) continue
 
-data.items.forEach(v=>{
+const coords = await geocode(place)
 
-videos.push({
+if(!coords) continue
 
-id:v.id.videoId,
-title:v.snippet.title,
-description:v.snippet.description
-
-})
-
-})
-
-pageToken=data.nextPageToken
-
-}while(pageToken)
-
-return videos
-
-}
-
-
-function detectLocation(text){
-
-text=text.toLowerCase()
-
-if(text.includes("mexico")||text.includes("meksika"))
-return {lat:23.6345,lng:-102.5528}
-
-if(text.includes("cairo")||text.includes("kahire"))
-return {lat:30.0444,lng:31.2357}
-
-if(text.includes("medina")||text.includes("medine"))
-return {lat:24.5247,lng:39.5692}
-
-if(text.includes("mecca")||text.includes("mekke"))
-return {lat:21.3891,lng:39.8579}
-
-if(text.includes("riyadh")||text.includes("riyad"))
-return {lat:24.7136,lng:46.6753}
-
-if(text.includes("puerto rico")||text.includes("porto riko"))
-return {lat:18.2208,lng:-66.5901}
-
-return null
-
-}
-
-
-app.get("/api/videos", async (req,res)=>{
-
-const videos = await getAllVideos()
-
-const mapped=[]
-
-videos.forEach(v=>{
-
-const loc = detectLocation(
-v.title+" "+v.description
-)
-
-if(!loc) return
-
-mapped.push({
+cache.push({
 
 id:v.id,
 title:v.title,
-lat:loc.lat,
-lng:loc.lng,
+location:place,
+lat:coords.lat,
+lng:coords.lng,
 thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
 
 })
 
+console.log("Mapped:",place)
+
+}
+
+fs.writeFileSync(
+"cache.json",
+JSON.stringify(cache,null,2)
+)
+
+}
+
+app.get("/api/videos",(req,res)=>{
+
+res.json(cache)
+
 })
 
-res.json(mapped)
+app.listen(PORT,async()=>{
 
-})
+console.log("Travel Map Engine Running")
 
-
-app.listen(PORT,()=>{
-
-console.log("Travel Map Backend Running")
+await buildMap()
 
 })
