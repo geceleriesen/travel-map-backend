@@ -20,26 +20,44 @@ for(const video of videos){
 
 const text = video.title + " " + video.description
 
+let lat = null
+let lng = null
+let location = "Unknown"
+
 const place = detectLocation(text)
 
-if(!place) continue
+if(place){
 
 const geo = await geocode(place)
 
-if(!geo) continue
+if(geo){
+lat = geo.lat
+lng = geo.lng
+location = geo.name
+}
+
+}
+
+/* fallback world position */
+if(!lat){
+lat = 20
+lng = 0
+}
 
 results.push({
 id:video.id,
-lat:geo.lat,
-lng:geo.lng,
-location:geo.name,
+lat,
+lng,
+location,
 title:video.title,
 shortDescription:video.description.slice(0,120),
 thumbnail:video.thumbnail
 })
+
 }
 
 cache = results
 
 console.log("Videos mapped:",results.length)
+
 }
