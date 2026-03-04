@@ -1,23 +1,18 @@
 import fetch from "node-fetch"
 
-const placeCache = {}
+const cache = {}
 
-export async function geocode(text) {
+export async function geocode(place) {
 
-  const match =
-    text.match(/(istanbul|kahire|giza|mexico|porto rico|san juan|beijing)/i)
+  if (cache[place]) return cache[place]
 
-  if (!match) return null
+  const url =
+    "https://nominatim.openstreetmap.org/search?format=json&q=" +
+    encodeURIComponent(place)
 
-  const place = match[0].toLowerCase()
-
-  if (placeCache[place]) return placeCache[place]
-
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-      place
-    )}&format=json`
-  )
+  const res = await fetch(url, {
+    headers: { "User-Agent": "travel-map-engine" }
+  })
 
   const data = await res.json()
 
@@ -29,7 +24,7 @@ export async function geocode(text) {
     name: data[0].display_name.split(",")[0]
   }
 
-  placeCache[place] = geo
+  cache[place] = geo
 
   return geo
 }
