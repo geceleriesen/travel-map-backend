@@ -1,60 +1,46 @@
 import fetch from "node-fetch"
 
-const API="https://www.googleapis.com/youtube/v3"
+const API = "https://www.googleapis.com/youtube/v3"
 
-const KEY=process.env.YOUTUBE_API_KEY
-const CHANNEL=process.env.YOUTUBE_CHANNEL_ID
+export async function getChannelVideos(){
 
-async function getUploadsPlaylist(){
+const CHANNEL = process.env.YOUTUBE_CHANNEL_ID
+const KEY = process.env.YOUTUBE_API_KEY
 
-const url =
+const ch = await fetch(
 `${API}/channels?part=contentDetails&id=${CHANNEL}&key=${KEY}`
+)
 
-const res = await fetch(url)
+const chData = await ch.json()
 
-const data = await res.json()
+const uploads =
+chData.items[0].contentDetails.relatedPlaylists.uploads
 
-return data.items[0].contentDetails.relatedPlaylists.uploads
-
-}
-
-async function getPlaylistVideos(playlist){
-
-let pageToken=""
-const videos=[]
+let page = ""
+let videos = []
 
 do{
 
-const url =
-`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${KEY}`
-
-const res = await fetch(url)
+const res = await fetch(
+`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${uploads}&pageToken=${page}&key=${KEY}`
+)
 
 const data = await res.json()
 
-data.items.forEach(v => {
+data.items.forEach(v=>{
 
 videos.push({
-
 id:v.snippet.resourceId.videoId,
-title:v.snippet.title
-
+title:v.snippet.title,
+description:v.snippet.description
 })
 
 })
 
-pageToken=data.nextPageToken
+page = data.nextPageToken
 
-}while(pageToken)
+}while(page)
 
 return videos
-
-}
-
-export async function getAllVideos(){
-
-const uploads=await getUploadsPlaylist()
-
-return await getPlaylistVideos(uploads)
 
 }
