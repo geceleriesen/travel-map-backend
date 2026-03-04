@@ -1,84 +1,35 @@
 import express from "express"
 import cors from "cors"
-import fs from "fs"
 
 const app = express()
 app.use(cors())
 
 const PORT = process.env.PORT || 10000
 
-const API="https://www.googleapis.com/youtube/v3"
+const API = "https://www.googleapis.com/youtube/v3"
 
-const API_KEY=process.env.YOUTUBE_API_KEY
-const CHANNEL_ID=process.env.YOUTUBE_CHANNEL_ID
-
-const cities = JSON.parse(fs.readFileSync("./cities.json"))
-
-const CACHE="cache.json"
-
-
-
-function extractCity(text){
-
-text=text.toLowerCase()
-
-for(const city of cities){
-
-if(text.includes(city.name.toLowerCase())){
-return city
-}
-
-}
-
-return null
-}
-
-
-
-async function geocode(q){
-
-try{
-
-const res = await fetch(
-`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`
-)
-
-const data=await res.json()
-
-if(data.length){
-
-return{
-lat:parseFloat(data[0].lat),
-lng:parseFloat(data[0].lon)
-}
-
-}
-
-}catch(e){}
-
-return null
-}
-
-
-
-function randomLocation(){
-
-return{
-lat:20+(Math.random()*60-30),
-lng:(Math.random()*120-60)
-}
-
-}
+const API_KEY = process.env.YOUTUBE_API_KEY
+const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
 
 
 
 async function getUploadsPlaylist(){
 
-const res=await fetch(
+const url =
 `${API}/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
-)
 
-const data=await res.json()
+const res = await fetch(url)
+const data = await res.json()
+
+if(data.error){
+console.log("CHANNEL ERROR:",data.error)
+return null
+}
+
+if(!data.items || data.items.length === 0){
+console.log("CHANNEL EMPTY")
+return null
+}
 
 return data.items[0].contentDetails.relatedPlaylists.uploads
 }
@@ -87,65 +38,60 @@ return data.items[0].contentDetails.relatedPlaylists.uploads
 
 async function fetchVideos(){
 
-const playlist=await getUploadsPlaylist()
+const playlist = await getUploadsPlaylist()
+
+if(!playlist){
+console.log("PLAYLIST NOT FOUND")
+return []
+}
 
 let pageToken=""
 const videos=[]
 
 do{
 
-const res=await fetch(
+const url =
 `${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${API_KEY}`
-)
 
-const data=await res.json()
+const res = await fetch(url)
+const data = await res.json()
 
-data.items.forEach(v=>{
+if(data.error){
+console.log("YOUTUBE ERROR:",data.error)
+break
+}
+
+if(!data.items){
+console.log("NO ITEMS RETURNED")
+break
+}
+
+for(const v of data.items){
 
 videos.push({
-id:v.snippet.resourceId.videoId,
-title:v.snippet.title,
-description:v.snippet.description,
-thumbnail:v.snippet.thumbnails.high.url
-})
+
+id: v.snippet.resourceId.videoId,
+
+title: v.snippet.title,
+
+thumbnail: v.snippet.thumbnails.high.url,
+
+lat: 20 + (Math.random()*40-20),
+
+lng: Math.random()*120-60
 
 })
 
-pageToken=data.nextPageToken
+}
+
+pageToken = data.nextPageToken
 
 }while(pageToken)
 
+console.log("VIDEOS FOUND:",videos.length)
 
+return videos
 
-const mapped=[]
-
-for(const v of videos){
-
-let loc = extractCity(v.title+" "+v.description)
-
-if(!loc){
-loc = await geocode(v.title)
-}
-
-if(!loc){
-loc = randomLocation()
-}
-
-mapped.push({
-id:v.id,
-title:v.title,
-thumbnail:v.thumbnail,
-lat:loc.lat,
-lng:loc.lng
-})
-
-}
-
-
-
-fs.writeFileSync(CACHE,JSON.stringify(mapped))
-
-return mapped
 }
 
 
@@ -154,17 +100,14 @@ app.get("/api/videos", async(req,res)=>{
 
 try{
 
-if(fs.existsSync(CACHE)){
-return res.json(JSON.parse(fs.readFileSync(CACHE)))
-}
-
-const vids=await fetchVideos()
+const vids = await fetchVideos()
 
 res.json(vids)
 
-}catch(e){
+}catch(err){
 
-console.log(e)
+console.log("SERVER ERROR:",err)
+
 res.json([])
 
 }
@@ -173,19 +116,6 @@ res.json([])
 
 
 
-app.get("/refresh",async(req,res)=>{
-
-const vids=await fetchVideos()
-
-res.json({
-status:"refreshed",
-videos:vids.length
-})
-
-})
-
-
-
 app.listen(PORT,()=>{
-console.log("Travel Map Engine running")
+console.log("Travel backend running")
 })
