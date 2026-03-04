@@ -4,40 +4,42 @@ import { geocode } from "./geocode.js"
 
 let cache = []
 
-export function getCache() {
-  return cache
+export function getCache(){
+return cache
 }
 
-export async function updateCache() {
+export async function updateCache(){
 
-  const videos = await getAllVideos()
+console.log("Scanning channel...")
 
-  const results = []
+const videos = await getAllVideos()
 
-  for (const video of videos) {
+const results = []
 
-    const text = video.title + " " + video.description
+for(const video of videos){
 
-    const place = detectLocation(text)
+const text = video.title + " " + video.description
 
-    if (!place) continue
+const place = detectLocation(text)
 
-    const geo = await geocode(place)
+if(!place) continue
 
-    if (!geo) continue
+const geo = await geocode(place)
 
-    results.push({
-      id: video.id,
-      lat: geo.lat,
-      lng: geo.lng,
-      location: geo.name,
-      title: video.title,
-      shortDescription: video.description.slice(0, 120),
-      thumbnail: video.thumbnail
-    })
-  }
+if(!geo) continue
 
-  cache = results
+results.push({
+id:video.id,
+lat:geo.lat,
+lng:geo.lng,
+location:geo.name,
+title:video.title,
+shortDescription:video.description.slice(0,120),
+thumbnail:video.thumbnail
+})
+}
 
-  console.log("Cache updated:", results.length)
+cache = results
+
+console.log("Videos mapped:",results.length)
 }
