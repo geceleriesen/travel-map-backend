@@ -6,7 +6,7 @@ const words=text.split(" ")
 
 for(const w of words){
 
-if(w.length<4) continue
+if(w.length < 4) continue
 
 try{
 
@@ -14,7 +14,9 @@ const url=
 `https://nominatim.openstreetmap.org/search?q=${w}&format=json&limit=1`
 
 const res=await fetch(url,{
-headers:{'User-Agent':'travel-map'}
+headers:{
+'User-Agent':'travel-map'
+}
 })
 
 const data=await res.json()
@@ -36,5 +38,4 @@ lng:parseFloat(data[0].lon)
 }
 
 return null
-
 }
