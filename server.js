@@ -12,7 +12,7 @@ app.use(cors())
 
 const PORT = 10000
 
-let cache = []
+let cache=[]
 
 async function buildMap(){
 
@@ -20,43 +20,37 @@ console.log("Scanning channel...")
 
 const videos = await getAllVideos()
 
-const results = []
+const results=[]
 
 for(const v of videos){
 
-const location = detectLocation(v.title + " " + v.description)
+const location = await detectLocation(
+v.title+" "+v.description
+)
 
 if(!location) continue
-
-let lat = location.lat
-let lng = location.lng
-
-lat += (Math.random()-0.5)*0.3
-lng += (Math.random()-0.5)*0.3
 
 results.push({
 
 id:v.id,
-lat,
-lng,
-location:location.name,
 title:v.title,
+lat:location.lat,
+lng:location.lng,
+location:location.name,
 thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
 
 })
 
 }
 
-cache = results
+cache=results
 
-console.log("Videos mapped:",results.length)
+console.log("Mapped videos:",results.length)
 
 }
 
 app.get("/api/videos",(req,res)=>{
-
 res.json(cache)
-
 })
 
 app.listen(PORT,async()=>{
