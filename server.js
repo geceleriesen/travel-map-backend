@@ -24,17 +24,17 @@ return data.items[0].contentDetails.relatedPlaylists.uploads
 
 }
 
-async function getVideos(){
+async function getAllVideos(){
 
 const playlist = await getUploadsPlaylist()
 
-let next = ""
-const videos = []
+let nextPage = ""
+let videos = []
 
 do{
 
 const res = await fetch(
-`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${next}&key=${process.env.YOUTUBE_API_KEY}`
+`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${nextPage}&key=${process.env.YOUTUBE_API_KEY}`
 )
 
 const data = await res.json()
@@ -48,9 +48,9 @@ title:v.snippet.title
 
 })
 
-next = data.nextPageToken
+nextPage = data.nextPageToken
 
-}while(next)
+}while(nextPage)
 
 return videos
 
@@ -63,27 +63,28 @@ title = title.toLowerCase()
 if(title.includes("mexico") || title.includes("meksika"))
 return {lat:23.6345,lng:-102.5528}
 
-if(title.includes("kahire") || title.includes("cairo"))
+if(title.includes("cairo") || title.includes("kahire"))
 return {lat:30.0444,lng:31.2357}
 
-if(title.includes("medine") || title.includes("medina"))
+if(title.includes("medina") || title.includes("medine"))
 return {lat:24.5247,lng:39.5692}
 
-if(title.includes("mekke") || title.includes("mecca"))
+if(title.includes("mecca") || title.includes("mekke"))
 return {lat:21.3891,lng:39.8579}
 
-if(title.includes("riyad") || title.includes("riyadh"))
+if(title.includes("riyadh") || title.includes("riyad"))
 return {lat:24.7136,lng:46.6753}
 
-if(title.includes("porto riko") || title.includes("puerto rico"))
+if(title.includes("puerto rico") || title.includes("porto riko"))
 return {lat:18.2208,lng:-66.5901}
 
 return null
+
 }
 
 app.get("/api/videos", async (req,res)=>{
 
-const videos = await getVideos()
+const videos = await getAllVideos()
 
 const result = []
 
