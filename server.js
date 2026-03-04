@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import fs from "fs"
 
 const app = express()
 app.use(cors())
@@ -10,42 +11,22 @@ const CHANNEL =
 "https://www.youtube.com/@YOUR_CHANNEL/videos"
 
 
-
-const locations = {
-
-"mexico":[23.63,-102.55],
-"meksika":[23.63,-102.55],
-
-"cairo":[30.04,31.23],
-"kahire":[30.04,31.23],
-
-"medina":[24.52,39.56],
-"medine":[24.52,39.56],
-
-"mecca":[21.38,39.85],
-"mekke":[21.38,39.85],
-
-"riyadh":[24.71,46.67],
-"riyad":[24.71,46.67],
-
-"puerto rico":[18.22,-66.59],
-"porto riko":[18.22,-66.59]
-
-}
+const cities =
+JSON.parse(fs.readFileSync("./cities.json"))
 
 
-
-function detectLocation(text){
+function detectCity(text){
 
 text = text.toLowerCase()
 
-for(const key in locations){
+for(const c of cities){
 
-if(text.includes(key)){
+if(text.includes(c.name.toLowerCase())){
 
 return {
-lat:locations[key][0],
-lng:locations[key][1]
+city:c.name,
+lat:c.lat,
+lng:c.lng
 }
 
 }
@@ -57,19 +38,41 @@ return null
 }
 
 
+async function geocode(query){
+
+try{
+
+const url =
+`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
+
+const res = await fetch(url)
+
+const data = await res.json()
+
+if(data.length){
+
+return {
+lat:parseFloat(data[0].lat),
+lng:parseFloat(data[0].lon)
+}
+
+}
+
+}catch(e){}
+
+return null
+
+}
+
 
 function randomLocation(){
 
 return {
-
-lat:20 + (Math.random()*60 - 30),
-
-lng:(Math.random()*120 - 60)
-
+lat:20 + (Math.random()*60-30),
+lng:(Math.random()*120-60)
 }
 
 }
-
 
 
 async function getVideos(){
@@ -79,28 +82,33 @@ const res = await fetch(CHANNEL)
 const html = await res.text()
 
 
-
-const idMatches =
-[...html.matchAll(/"videoId":"(.*?)"/g)]
-
-const titleMatches =
-[...html.matchAll(/"title":{"runs":\[\{"text":"(.*?)"/g)]
-
-
-
 const ids =
-[...new Set(idMatches.map(v=>v[1]))]
+[...html.matchAll(/"videoId":"(.*?)"/g)]
+.map(v=>v[1])
+
+const titles =
+[...html.matchAll(/"title":{"runs":\[\{"text":"(.*?)"/g)]
+.map(v=>v[1])
 
 
+const unique = [...new Set(ids)]
 
-const videos = ids.map((id,i)=>{
-
-const title =
-titleMatches[i]?.[1] || "YouTube Video"
+const videos = []
 
 
+for(let i=0;i<unique.length;i++){
 
-let loc = detectLocation(title)
+const id = unique[i]
+
+const title = titles[i] || "Video"
+
+let loc = detectCity(title)
+
+if(!loc){
+
+loc = await geocode(title)
+
+}
 
 if(!loc){
 
@@ -108,9 +116,7 @@ loc = randomLocation()
 
 }
 
-
-
-return {
+videos.push({
 
 id,
 title,
@@ -121,25 +127,22 @@ thumbnail:
 lat:loc.lat,
 lng:loc.lng
 
-}
-
 })
 
-
+}
 
 return videos
 
 }
 
 
-
-app.get("/api/videos", async (req,res)=>{
+app.get("/api/videos", async(req,res)=>{
 
 try{
 
-const videos = await getVideos()
+const vids = await getVideos()
 
-res.json(videos)
+res.json(vids)
 
 }catch(e){
 
@@ -152,9 +155,8 @@ res.json([])
 })
 
 
-
 app.listen(PORT,()=>{
 
-console.log("Travel backend running")
+console.log("Travel Map Engine running")
 
 })
