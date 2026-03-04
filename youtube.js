@@ -1,10 +1,8 @@
 import fetch from "node-fetch"
 
 const API="https://www.googleapis.com/youtube/v3"
-
 const KEY=process.env.YOUTUBE_API_KEY
 const CHANNEL=process.env.YOUTUBE_CHANNEL_ID
-
 
 async function getUploadsPlaylist(){
 
@@ -16,7 +14,6 @@ const data=await res.json()
 return data.items[0].contentDetails.relatedPlaylists.uploads
 
 }
-
 
 async function getPlaylistVideos(playlist){
 
@@ -49,7 +46,6 @@ pageToken=data.nextPageToken
 return videos
 
 }
-
 
 export async function getAllVideos(){
 
