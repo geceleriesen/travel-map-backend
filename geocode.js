@@ -10,21 +10,40 @@ export async function geocode(place) {
     "https://nominatim.openstreetmap.org/search?format=json&q=" +
     encodeURIComponent(place)
 
-  const res = await fetch(url, {
-    headers: { "User-Agent": "travel-map-engine" }
-  })
+  try {
 
-  const data = await res.json()
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "travel-map-engine"
+      }
+    })
 
-  if (!data.length) return null
+    const text = await res.text()
 
-  const geo = {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon),
-    name: data[0].display_name.split(",")[0]
+    // XML gelirse atla
+    if (text.startsWith("<")) {
+      console.log("Nominatim returned XML, skipping:", place)
+      return null
+    }
+
+    const data = JSON.parse(text)
+
+    if (!data.length) return null
+
+    const geo = {
+      lat: parseFloat(data[0].lat),
+      lng: parseFloat(data[0].lon),
+      name: data[0].display_name.split(",")[0]
+    }
+
+    cache[place] = geo
+
+    return geo
+
+  } catch (err) {
+
+    console.log("Geocode error:", place)
+
+    return null
   }
-
-  cache[place] = geo
-
-  return geo
 }
