@@ -1,36 +1,29 @@
-export async function geocode(city){
+import fetch from "node-fetch"
 
-if(city==="unknown"){
+export async function geocode(query){
 
-return {
-lat:20+(Math.random()*60-30),
-lng:(Math.random()*120-60)
-}
+try{
 
-}
+const url =
+`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
 
-const res = await fetch(
-
-`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`
-
-)
+const res = await fetch(url)
 
 const data = await res.json()
 
-if(!data.length){
+if(data.length){
 
 return {
-lat:20+(Math.random()*60-30),
-lng:(Math.random()*120-60)
+lat: parseFloat(data[0].lat),
+lng: parseFloat(data[0].lon)
 }
 
 }
 
-return {
-
-lat:parseFloat(data[0].lat),
-lng:parseFloat(data[0].lon)
-
+}catch(e){
+console.log("GEOCODE FAIL")
 }
+
+return null
 
 }
