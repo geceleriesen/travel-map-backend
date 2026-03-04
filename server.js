@@ -3,7 +3,6 @@ import cors from "cors"
 import dotenv from "dotenv"
 
 import {getAllVideos} from "./youtube.js"
-import {detectLocation} from "./locationEngine.js"
 
 dotenv.config()
 
@@ -16,44 +15,38 @@ let cache=[]
 
 async function buildMap(){
 
-console.log("Scanning channel videos...")
+console.log("Loading channel videos...")
 
 const videos = await getAllVideos()
 
-const mapped=[]
+const mapped = videos.map(v => {
 
-for(const v of videos){
-
-const location = await detectLocation(
-v.title + " " + v.description
-)
-
-if(!location) continue
-
-mapped.push({
+return {
 
 id:v.id,
 title:v.title,
 
-lat:location.lat,
-lng:location.lng,
+/* geçici koordinat */
 
-location:location.name,
+lat:20 + (Math.random()*60 - 30),
+lng:(Math.random()*140 - 70),
 
 thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
 
-})
-
 }
+
+})
 
 cache=mapped
 
-console.log("Videos mapped:",mapped.length)
+console.log("Videos loaded:",mapped.length)
 
 }
 
 app.get("/api/videos",(req,res)=>{
+
 res.json(cache)
+
 })
 
 app.listen(PORT,async()=>{
