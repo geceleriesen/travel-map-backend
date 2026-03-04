@@ -1,34 +1,28 @@
-const cities=[
+import fs from "fs"
 
-"mexico",
-"mexico city",
-"cairo",
-"giza",
-"riyadh",
-"medina",
-"mecca",
-"istanbul",
-"paris",
-"london",
-"new york",
-"los angeles",
-"tokyo",
-"dubai",
-"rome"
-
-]
-
+const cities =
+JSON.parse(fs.readFileSync("./cities.json"))
 
 export function detectCity(text){
 
-text=text.toLowerCase()
+if(!text) return null
 
-for(const c of cities){
+text = text.toLowerCase()
 
-if(text.includes(c)) return c
+for(const city of cities){
+
+if(text.includes(city.name.toLowerCase())){
+
+return {
+lat: city.lat,
+lng: city.lng,
+name: city.name
+}
 
 }
 
-return "unknown"
+}
+
+return null
 
 }
