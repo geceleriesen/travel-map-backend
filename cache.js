@@ -20,11 +20,11 @@ for(const video of videos){
 
 const text = video.title + " " + video.description
 
-let lat = null
-let lng = null
-let location = "Unknown"
-
 const place = detectLocation(text)
+
+let lat = 20
+let lng = 0
+let location = "Unknown"
 
 if(place){
 
@@ -36,12 +36,6 @@ lng = geo.lng
 location = geo.name
 }
 
-}
-
-/* fallback world position */
-if(!lat){
-lat = 20
-lng = 0
 }
 
 results.push({
