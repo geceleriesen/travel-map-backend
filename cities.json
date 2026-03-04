@@ -1,7 +1,7 @@
 [
- {"name":"Istanbul","lat":41.0082,"lng":28.9784},
- {"name":"Paris","lat":48.8566,"lng":2.3522},
- {"name":"London","lat":51.5072,"lng":-0.1276},
- {"name":"Tokyo","lat":35.6895,"lng":139.6917},
- {"name":"Dubai","lat":25.2048,"lng":55.2708}
+ { "name":"Istanbul","lat":41.0082,"lng":28.9784 },
+ { "name":"Cairo","lat":30.0444,"lng":31.2357 },
+ { "name":"Mexico City","lat":19.4326,"lng":-99.1332 },
+ { "name":"Medina","lat":24.5247,"lng":39.5692 },
+ { "name":"Mecca","lat":21.3891,"lng":39.8579 }
 ]
