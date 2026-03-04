@@ -3,6 +3,8 @@ import cors from "cors"
 import dotenv from "dotenv"
 
 import {getAllVideos} from "./youtube.js"
+import {detectLocation} from "./cityDetector.js"
+import {geocode} from "./geocode.js"
 
 dotenv.config()
 
@@ -11,35 +13,44 @@ app.use(cors())
 
 const PORT = 10000
 
-let cache=[]
+let cache = []
 
 async function buildMap(){
 
-console.log("Loading channel videos...")
+console.log("Scanning videos...")
 
 const videos = await getAllVideos()
 
-const mapped = videos.map(v => {
+const result = []
 
-return {
+for(const v of videos){
+
+const place = detectLocation(v.title)
+
+if(!place) continue
+
+const coords = await geocode(place)
+
+if(!coords) continue
+
+result.push({
 
 id:v.id,
 title:v.title,
-
-/* geçici koordinat */
-
-lat:20 + (Math.random()*60 - 30),
-lng:(Math.random()*140 - 70),
-
+location:place,
+lat:coords.lat,
+lng:coords.lng,
 thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
-
-}
 
 })
 
-cache=mapped
+console.log("Mapped:",place)
 
-console.log("Videos loaded:",mapped.length)
+}
+
+cache = result
+
+console.log("Total mapped:",cache.length)
 
 }
 
@@ -49,9 +60,9 @@ res.json(cache)
 
 })
 
-app.listen(PORT,async()=>{
+app.listen(PORT, async ()=>{
 
-console.log("Travel Map Backend Running")
+console.log("Backend started")
 
 await buildMap()
 
