@@ -6,11 +6,11 @@ export async function geocode(place){
 
 if(cache[place]) return cache[place]
 
-const url =
-"https://nominatim.openstreetmap.org/search?format=json&q="+
-encodeURIComponent(place)
-
 try{
+
+const url =
+"https://nominatim.openstreetmap.org/search?format=json&q=" +
+encodeURIComponent(place)
 
 const res = await fetch(url,{
 headers:{
@@ -18,14 +18,11 @@ headers:{
 }
 })
 
-const text = await res.text()
+const txt = await res.text()
 
-if(text.startsWith("<")){
-console.log("Nominatim XML error:",place)
-return null
-}
+if(txt.startsWith("<")) return null
 
-const data = JSON.parse(text)
+const data = JSON.parse(txt)
 
 if(!data.length) return null
 
@@ -39,10 +36,10 @@ cache[place] = geo
 
 return geo
 
-}catch(err){
-
-console.log("Geocode fail:",place)
+}catch{
 
 return null
+
 }
+
 }
