@@ -7,11 +7,12 @@ const CHANNEL=process.env.YOUTUBE_CHANNEL_ID
 
 async function getUploadsPlaylist(){
 
-const url=
+const url =
 `${API}/channels?part=contentDetails&id=${CHANNEL}&key=${KEY}`
 
-const res=await fetch(url)
-const data=await res.json()
+const res = await fetch(url)
+
+const data = await res.json()
 
 return data.items[0].contentDetails.relatedPlaylists.uploads
 
@@ -24,19 +25,19 @@ const videos=[]
 
 do{
 
-const url=
+const url =
 `${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${KEY}`
 
-const res=await fetch(url)
-const data=await res.json()
+const res = await fetch(url)
 
-data.items.forEach(v=>{
+const data = await res.json()
+
+data.items.forEach(v => {
 
 videos.push({
 
 id:v.snippet.resourceId.videoId,
-title:v.snippet.title,
-description:v.snippet.description
+title:v.snippet.title
 
 })
 
@@ -53,6 +54,7 @@ return videos
 export async function getAllVideos(){
 
 const uploads=await getUploadsPlaylist()
+
 return await getPlaylistVideos(uploads)
 
 }
