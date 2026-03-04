@@ -7,29 +7,28 @@ app.use(cors())
 
 const PORT = process.env.PORT || 10000
 
-const API = "https://www.googleapis.com/youtube/v3"
+const API="https://www.googleapis.com/youtube/v3"
 
-const API_KEY = process.env.YOUTUBE_API_KEY
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
-
-const CACHE_FILE = "./cache.json"
+const API_KEY=process.env.YOUTUBE_API_KEY
+const CHANNEL_ID=process.env.YOUTUBE_CHANNEL_ID
 
 const cities = JSON.parse(fs.readFileSync("./cities.json"))
 
+const CACHE="./cache.json"
 
 
-function detectCity(text){
 
-text = text.toLowerCase()
+/* AI CITY EXTRACTION */
 
-for(const c of cities){
+function extractCity(text){
 
-if(text.includes(c.name.toLowerCase())){
+text=text.toLowerCase()
 
-return {
-lat:c.lat,
-lng:c.lng
-}
+for(const city of cities){
+
+if(text.includes(city.name.toLowerCase())){
+
+return city
 
 }
 
@@ -41,14 +40,15 @@ return null
 
 
 
+/* GEOCODE FALLBACK */
+
 async function geocode(query){
 
 try{
 
-const url =
+const res = await fetch(
 `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
-
-const res = await fetch(url)
+)
 
 const data = await res.json()
 
@@ -69,10 +69,12 @@ return null
 
 
 
+/* RANDOM FALLBACK */
+
 function randomLocation(){
 
-return {
-lat:20 + (Math.random()*60-30),
+return{
+lat:20+(Math.random()*60-30),
 lng:(Math.random()*120-60)
 }
 
@@ -80,7 +82,9 @@ lng:(Math.random()*120-60)
 
 
 
-async function getUploadsPlaylist(){
+/* GET UPLOAD PLAYLIST */
+
+async function getPlaylist(){
 
 const res = await fetch(
 `${API}/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
@@ -94,9 +98,11 @@ return data.items[0].contentDetails.relatedPlaylists.uploads
 
 
 
+/* FETCH ALL VIDEOS */
+
 async function fetchVideos(){
 
-const playlist = await getUploadsPlaylist()
+const playlist = await getPlaylist()
 
 let pageToken=""
 const videos=[]
@@ -130,7 +136,7 @@ const mapped=[]
 
 for(const v of videos){
 
-let loc = detectCity(v.title + " " + v.description)
+let loc = extractCity(v.title+" "+v.description)
 
 if(!loc){
 
@@ -159,7 +165,7 @@ lng:loc.lng
 
 
 
-fs.writeFileSync(CACHE_FILE,JSON.stringify(mapped,null,2))
+fs.writeFileSync(CACHE,JSON.stringify(mapped,null,2))
 
 return mapped
 
@@ -167,15 +173,15 @@ return mapped
 
 
 
+/* API */
+
 app.get("/api/videos", async(req,res)=>{
 
 try{
 
-if(fs.existsSync(CACHE_FILE)){
+if(fs.existsSync(CACHE)){
 
-const cache = JSON.parse(fs.readFileSync(CACHE_FILE))
-
-return res.json(cache)
+return res.json(JSON.parse(fs.readFileSync(CACHE)))
 
 }
 
@@ -186,7 +192,6 @@ res.json(vids)
 }catch(e){
 
 console.log(e)
-
 res.json([])
 
 }
@@ -195,12 +200,14 @@ res.json([])
 
 
 
+/* CACHE REFRESH */
+
 app.get("/refresh", async(req,res)=>{
 
 const vids = await fetchVideos()
 
 res.json({
-status:"cache refreshed",
+status:"refreshed",
 videos:vids.length
 })
 
