@@ -10,7 +10,8 @@ if(w.length<4) continue
 
 try{
 
-const url=`https://nominatim.openstreetmap.org/search?q=${w}&format=json&limit=1`
+const url=
+`https://nominatim.openstreetmap.org/search?q=${w}&format=json&limit=1`
 
 const res=await fetch(url,{
 headers:{'User-Agent':'travel-map'}
@@ -35,4 +36,5 @@ lng:parseFloat(data[0].lon)
 }
 
 return null
+
 }
