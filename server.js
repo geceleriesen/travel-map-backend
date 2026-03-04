@@ -1,17 +1,14 @@
 import express from "express"
 import cors from "cors"
-import dotenv from "dotenv"
-
-dotenv.config()
 
 const app = express()
 app.use(cors())
 
-const API = "https://www.googleapis.com/youtube/v3"
-const PORT = process.env.PORT || 10000
+const API="https://www.googleapis.com/youtube/v3"
+const PORT=10000
 
 
-async function getAllVideos(){
+async function getChannelVideos(){
 
 let pageToken=""
 let videos=[]
@@ -19,12 +16,7 @@ let videos=[]
 do{
 
 const res = await fetch(
-`${API}/search?key=${process.env.YOUTUBE_API_KEY}
-&channelId=${process.env.YOUTUBE_CHANNEL_ID}
-&part=snippet,id
-&type=video
-&maxResults=50
-&pageToken=${pageToken}`
+`${API}/search?part=snippet&type=video&maxResults=50&channelId=${process.env.YOUTUBE_CHANNEL_ID}&key=${process.env.YOUTUBE_API_KEY}&pageToken=${pageToken}`
 )
 
 const data = await res.json()
@@ -52,45 +44,30 @@ return videos
 }
 
 
-
 app.get("/api/videos", async (req,res)=>{
 
-try{
+const videos = await getChannelVideos()
 
-const videos = await getAllVideos()
-
-/* geçici koordinat */
 const mapped = videos.map(v=>({
 
 id:v.id,
 title:v.title,
+thumbnail:v.thumbnail,
+
+/* temporary coordinates */
+
 lat:20 + (Math.random()*60-30),
-lng:(Math.random()*120-60),
-thumbnail:v.thumbnail
+lng:(Math.random()*120-60)
 
 }))
 
 res.json(mapped)
-
-}catch(e){
-
-console.log(e)
-res.json([])
-
-}
-
-})
-
-
-app.get("/",(req,res)=>{
-
-res.send("Travel Map Backend Running")
 
 })
 
 
 app.listen(PORT,()=>{
 
-console.log("Server started")
+console.log("Travel backend running")
 
 })
