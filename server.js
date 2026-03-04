@@ -14,11 +14,9 @@ const CHANNEL_ID=process.env.YOUTUBE_CHANNEL_ID
 
 const cities = JSON.parse(fs.readFileSync("./cities.json"))
 
-const CACHE="./cache.json"
+const CACHE="cache.json"
 
 
-
-/* AI CITY EXTRACTION */
 
 function extractCity(text){
 
@@ -27,34 +25,29 @@ text=text.toLowerCase()
 for(const city of cities){
 
 if(text.includes(city.name.toLowerCase())){
-
 return city
-
 }
 
 }
 
 return null
-
 }
 
 
 
-/* GEOCODE FALLBACK */
-
-async function geocode(query){
+async function geocode(q){
 
 try{
 
 const res = await fetch(
-`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
+`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`
 )
 
-const data = await res.json()
+const data=await res.json()
 
 if(data.length){
 
-return {
+return{
 lat:parseFloat(data[0].lat),
 lng:parseFloat(data[0].lon)
 }
@@ -64,12 +57,9 @@ lng:parseFloat(data[0].lon)
 }catch(e){}
 
 return null
-
 }
 
 
-
-/* RANDOM FALLBACK */
 
 function randomLocation(){
 
@@ -82,38 +72,33 @@ lng:(Math.random()*120-60)
 
 
 
-/* GET UPLOAD PLAYLIST */
+async function getUploadsPlaylist(){
 
-async function getPlaylist(){
-
-const res = await fetch(
+const res=await fetch(
 `${API}/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
 )
 
-const data = await res.json()
+const data=await res.json()
 
 return data.items[0].contentDetails.relatedPlaylists.uploads
-
 }
 
 
 
-/* FETCH ALL VIDEOS */
-
 async function fetchVideos(){
 
-const playlist = await getPlaylist()
+const playlist=await getUploadsPlaylist()
 
 let pageToken=""
 const videos=[]
 
 do{
 
-const res = await fetch(
+const res=await fetch(
 `${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${API_KEY}`
 )
 
-const data = await res.json()
+const data=await res.json()
 
 data.items.forEach(v=>{
 
@@ -139,53 +124,41 @@ for(const v of videos){
 let loc = extractCity(v.title+" "+v.description)
 
 if(!loc){
-
 loc = await geocode(v.title)
-
 }
 
 if(!loc){
-
 loc = randomLocation()
-
 }
 
 mapped.push({
-
 id:v.id,
 title:v.title,
 thumbnail:v.thumbnail,
-
 lat:loc.lat,
 lng:loc.lng
-
 })
 
 }
 
 
 
-fs.writeFileSync(CACHE,JSON.stringify(mapped,null,2))
+fs.writeFileSync(CACHE,JSON.stringify(mapped))
 
 return mapped
-
 }
 
 
-
-/* API */
 
 app.get("/api/videos", async(req,res)=>{
 
 try{
 
 if(fs.existsSync(CACHE)){
-
 return res.json(JSON.parse(fs.readFileSync(CACHE)))
-
 }
 
-const vids = await fetchVideos()
+const vids=await fetchVideos()
 
 res.json(vids)
 
@@ -200,11 +173,9 @@ res.json([])
 
 
 
-/* CACHE REFRESH */
+app.get("/refresh",async(req,res)=>{
 
-app.get("/refresh", async(req,res)=>{
-
-const vids = await fetchVideos()
+const vids=await fetchVideos()
 
 res.json({
 status:"refreshed",
@@ -216,7 +187,5 @@ videos:vids.length
 
 
 app.listen(PORT,()=>{
-
 console.log("Travel Map Engine running")
-
 })
