@@ -1,4 +1,4 @@
-const cities = [
+const cities=[
 
 "Mexico City",
 "Cairo",
@@ -19,13 +19,16 @@ const cities = [
 "Istanbul",
 "Paris",
 "London",
-"Rome"
+"Rome",
+"Barcelona",
+"Tokyo",
+"Seoul"
 
 ]
 
 export function detectLocation(text){
 
-text = text.toLowerCase()
+text=text.toLowerCase()
 
 for(const city of cities){
 
