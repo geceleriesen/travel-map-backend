@@ -1,27 +1,34 @@
-import { cities } from "./cities.js"
-
 export function detectLocation(text){
 
-const clean = text.toLowerCase()
+text = text.toLowerCase()
 
-for(const city of cities){
-if(clean.includes(city)) return city
+const words = text
+.replace(/[^\w\s]/g," ")
+.split(/\s+/)
+
+for(const word of words){
+
+if(word.length < 4) continue
+
+if(
+word.includes("istanbul") ||
+word.includes("cairo") ||
+word.includes("mexico") ||
+word.includes("tokyo") ||
+word.includes("paris") ||
+word.includes("rome") ||
+word.includes("bangkok") ||
+word.includes("bali") ||
+word.includes("dubai")
+){
+return word
 }
 
-// detect flag emojis
-const flags = {
-"🇹🇷":"turkey",
-"🇪🇬":"egypt",
-"🇲🇽":"mexico",
-"🇨🇳":"china",
-"🇵🇷":"puerto rico",
-"🇯🇵":"japan",
-"🇹🇭":"thailand"
 }
 
-for(const flag in flags){
-if(text.includes(flag)) return flags[flag]
-}
+const flag = text.match(/🇹🇷|🇪🇬|🇲🇽|🇵🇷|🇨🇳|🇯🇵/)
+
+if(flag) return flag[0]
 
 return null
 }
