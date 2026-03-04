@@ -1,28 +1,23 @@
 import fetch from "node-fetch"
 
-const API = "https://www.googleapis.com/youtube/v3"
+const API="https://www.googleapis.com/youtube/v3"
 
 export async function getChannelVideos(){
 
-const CHANNEL = process.env.YOUTUBE_CHANNEL_ID
-const KEY = process.env.YOUTUBE_API_KEY
-
-const ch = await fetch(
-`${API}/channels?part=contentDetails&id=${CHANNEL}&key=${KEY}`
-)
-
-const chData = await ch.json()
-
-const uploads =
-chData.items[0].contentDetails.relatedPlaylists.uploads
-
-let page = ""
-let videos = []
+let page=""
+let videos=[]
 
 do{
 
 const res = await fetch(
-`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${uploads}&pageToken=${page}&key=${KEY}`
+
+`${API}/search?key=${process.env.YOUTUBE_API_KEY}
+&channelId=${process.env.YOUTUBE_CHANNEL_ID}
+&part=snippet,id
+&type=video
+&maxResults=50
+&pageToken=${page}`
+
 )
 
 const data = await res.json()
@@ -30,14 +25,16 @@ const data = await res.json()
 data.items.forEach(v=>{
 
 videos.push({
-id:v.snippet.resourceId.videoId,
+
+id:v.id.videoId,
 title:v.snippet.title,
 description:v.snippet.description
-})
 
 })
 
-page = data.nextPageToken
+})
+
+page=data.nextPageToken
 
 }while(page)
 
