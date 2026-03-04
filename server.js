@@ -2,6 +2,7 @@ import express from "express"
 import fetch from "node-fetch"
 import cors from "cors"
 import dotenv from "dotenv"
+import cities from "./cities.json" assert { type: "json" }
 
 dotenv.config()
 
@@ -15,38 +16,20 @@ const KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL = process.env.YOUTUBE_CHANNEL_ID
 
 
-const cities = {
-
-"porto riko": {lat:18.2208,lng:-66.5901,name:"Puerto Rico"},
-"puerto rico": {lat:18.2208,lng:-66.5901,name:"Puerto Rico"},
-"san juan": {lat:18.4655,lng:-66.1057,name:"San Juan"},
-
-"mexico": {lat:23.6345,lng:-102.5528,name:"Mexico"},
-"meksika": {lat:23.6345,lng:-102.5528,name:"Mexico"},
-
-"cairo": {lat:30.0444,lng:31.2357,name:"Cairo"},
-"kahire": {lat:30.0444,lng:31.2357,name:"Cairo"},
-"giza": {lat:29.9773,lng:31.1325,name:"Giza"},
-
-"medine": {lat:24.5247,lng:39.5692,name:"Medina"},
-"mekke": {lat:21.3891,lng:39.8579,name:"Mecca"},
-"riyad": {lat:24.7136,lng:46.6753,name:"Riyadh"},
-
-"istanbul": {lat:41.0082,lng:28.9784,name:"Istanbul"},
-"paris": {lat:48.8566,lng:2.3522,name:"Paris"},
-"rome": {lat:41.9028,lng:12.4964,name:"Rome"}
-
-}
-
-
-function detectLocation(text){
+function findCity(text){
 
 const clean = text.toLowerCase()
 
-for(const city in cities){
+for(const city of cities){
 
-if(clean.includes(city)){
-return cities[city]
+if(clean.includes(city.name.toLowerCase())){
+
+return {
+lat: city.lat,
+lng: city.lng,
+name: city.name
+}
+
 }
 
 }
@@ -58,10 +41,10 @@ return null
 
 async function getUploadsPlaylist(){
 
-const url =
+const res = await fetch(
 `${API}/channels?part=contentDetails&id=${CHANNEL}&key=${KEY}`
+)
 
-const res = await fetch(url)
 const data = await res.json()
 
 return data.items[0].contentDetails.relatedPlaylists.uploads
@@ -72,32 +55,30 @@ return data.items[0].contentDetails.relatedPlaylists.uploads
 
 async function getVideos(playlist){
 
-let pageToken = ""
+let token = ""
 const videos = []
 
 do{
 
-const url =
-`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${KEY}`
+const res = await fetch(
+`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${token}&key=${KEY}`
+)
 
-const res = await fetch(url)
 const data = await res.json()
 
 data.items.forEach(v=>{
 
 videos.push({
-
-id: v.snippet.resourceId.videoId,
-title: v.snippet.title,
-description: v.snippet.description
-
+id:v.snippet.resourceId.videoId,
+title:v.snippet.title,
+description:v.snippet.description
 })
 
 })
 
-pageToken = data.nextPageToken
+token = data.nextPageToken
 
-}while(pageToken)
+}while(token)
 
 return videos
 
@@ -118,27 +99,26 @@ for(const v of videos){
 
 const text = v.title + " " + v.description
 
-let lat = 20
-let lng = 0
-let location = "Unknown"
+let location = findCity(text)
 
-const found = detectLocation(text)
+if(!location){
 
-if(found){
-lat = found.lat
-lng = found.lng
-location = found.name
+location = {
+lat:20,
+lng:0,
+name:"Unknown"
+}
+
 }
 
 results.push({
 
-id: v.id,
-lat,
-lng,
-location,
-title: v.title,
-thumbnail:
-"https://img.youtube.com/vi/"+v.id+"/hqdefault.jpg"
+id:v.id,
+lat:location.lat,
+lng:location.lng,
+location:location.name,
+title:v.title,
+thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
 
 })
 
@@ -147,9 +127,9 @@ thumbnail:
 res.json(results)
 
 }
-catch(err){
+catch(e){
 
-console.log(err)
+console.log(e)
 res.json([])
 
 }
@@ -158,7 +138,5 @@ res.json([])
 
 
 app.listen(PORT,()=>{
-
-console.log("Travel Map running on",PORT)
-
+console.log("Travel map running")
 })
