@@ -1,6 +1,6 @@
 {
-  "name": "travel-map-backend",
-  "version": "7.0.0",
+  "name": "travel-map-engine",
+  "version": "1.0.0",
   "type": "module",
   "main": "server.js",
   "scripts": {
