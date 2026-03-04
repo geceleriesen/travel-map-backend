@@ -3,49 +3,44 @@ import cors from "cors"
 import dotenv from "dotenv"
 
 import {getAllVideos} from "./youtube.js"
-import {detectLocation} from "./locationEngine.js"
 
 dotenv.config()
 
 const app = express()
+
 app.use(cors())
 
 const PORT = 10000
 
-let cache=[]
+let cache = []
 
 async function buildMap(){
 
-console.log("Scanning channel...")
+console.log("Loading channel videos...")
 
 const videos = await getAllVideos()
 
-const results=[]
+const results = videos.map(v => {
 
-for(const v of videos){
+return {
 
-const location = await detectLocation(
-v.title+" "+v.description
-)
+id: v.id,
+title: v.title,
 
-if(!location) continue
+/* geçici lokasyon */
 
-results.push({
+lat: 20 + Math.random()*40 - 20,
+lng: Math.random()*120 - 60,
 
-id:v.id,
-title:v.title,
-lat:location.lat,
-lng:location.lng,
-location:location.name,
-thumbnail:`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
-
-})
+thumbnail: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
 
 }
 
-cache=results
+})
 
-console.log("Mapped videos:",results.length)
+cache = results
+
+console.log("Videos loaded:", results.length)
 
 }
 
@@ -53,9 +48,9 @@ app.get("/api/videos",(req,res)=>{
 res.json(cache)
 })
 
-app.listen(PORT,async()=>{
+app.listen(PORT, async () => {
 
-console.log("Travel Map Engine running")
+console.log("Travel Map Backend Running")
 
 await buildMap()
 
