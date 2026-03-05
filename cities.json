@@ -1,9 +1,9 @@
 [
-{"name":"Mexico City","lat":19.4326,"lng":-99.1332},
-{"name":"Cairo","lat":30.0444,"lng":31.2357},
-{"name":"Medina","lat":24.5247,"lng":39.5692},
-{"name":"Mecca","lat":21.3891,"lng":39.8579},
-{"name":"Riyadh","lat":24.7136,"lng":46.6753},
-{"name":"Puerto Rico","lat":18.2208,"lng":-66.5901},
-{"name":"Malaysia","lat":4.2105,"lng":101.9758}
+{"name":"mexico","lat":23.63,"lng":-102.55},
+{"name":"cairo","lat":30.0444,"lng":31.2357},
+{"name":"medina","lat":24.5247,"lng":39.5692},
+{"name":"mecca","lat":21.3891,"lng":39.8579},
+{"name":"riyadh","lat":24.7136,"lng":46.6753},
+{"name":"puerto rico","lat":18.2208,"lng":-66.5901},
+{"name":"malaysia","lat":4.2105,"lng":101.9758}
 ]
