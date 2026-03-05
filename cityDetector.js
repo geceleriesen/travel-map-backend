@@ -14,9 +14,9 @@ for(const city of cities){
 if(text.includes(city.name.toLowerCase())){
 
 return {
-lat: city.lat,
-lng: city.lng,
-name: city.name
+lat:city.lat,
+lng:city.lng,
+name:city.name
 }
 
 }
