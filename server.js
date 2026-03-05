@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-import getVideos from "./scraper.js"
+import getVideos from "./rss.js"
 
 const app = express()
 
