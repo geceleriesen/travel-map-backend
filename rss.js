@@ -7,9 +7,9 @@ const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
 
 export default async function getVideos(){
 
-const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
-
-const feed = await parser.parseURL(url)
+const feed = await parser.parseURL(
+`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
+)
 
 const videos=[]
 
