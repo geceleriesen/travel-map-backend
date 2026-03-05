@@ -1,41 +1,46 @@
 import express from "express"
 import cors from "cors"
-import fs from "fs"
-import detectCity from "./cityDetector.js"
+import getVideos from "./youtube.js"
 
 const app = express()
 
 app.use(cors())
 
-const raw = fs.readFileSync("./videos.json","utf8")
-const videos = JSON.parse(raw)
+let cache = null
 
-const result = videos.map(v=>{
+app.get("/", (req,res)=>{
+res.send("Travel Map Backend Running")
+})
 
-const city = detectCity(v.title)
+app.get("/api/videos", async (req,res)=>{
 
-return {
+try{
 
-id:v.id,
-title:v.title,
-thumbnail:v.thumbnail,
-lat:city.lat,
-lng:city.lng
+if(cache){
+return res.json(cache)
+}
+
+const videos = await getVideos()
+
+cache = videos
+
+setTimeout(()=>{
+cache = null
+}, 1000*60*30)
+
+res.json(videos)
+
+}catch(e){
+
+console.log(e)
+res.json([])
 
 }
 
 })
 
-app.get("/",(req,res)=>{
-res.send("Travel Map Backend Running")
-})
-
-app.get("/api/videos",(req,res)=>{
-res.json(result)
-})
-
 const PORT = process.env.PORT || 10000
 
-app.listen(PORT,()=>{
+app.listen(PORT, ()=>{
 console.log("Server running",PORT)
 })
