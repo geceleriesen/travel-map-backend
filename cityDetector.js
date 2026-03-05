@@ -1,8 +1,12 @@
-import cities from "./cities.json" assert {type:"json"}
+import fs from "fs"
+
+const cities = JSON.parse(
+fs.readFileSync("./cities.json","utf8")
+)
 
 export default function detectCity(title){
 
-title=title.toLowerCase()
+title = title.toLowerCase()
 
 for(const city of cities){
 
@@ -15,10 +19,8 @@ return city
 }
 
 return {
-
 lat:0,
 lng:0
-
 }
 
 }
