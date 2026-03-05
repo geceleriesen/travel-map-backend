@@ -1,14 +1,13 @@
 import fs from "fs"
 
 const csv = fs.readFileSync("./worldcities.csv","utf8")
-
 const lines = csv.split("\n")
 
 const cities=[]
 
 for(let i=1;i<lines.length;i++){
 
-const p=lines[i].split(",")
+const p = lines[i].split(",")
 
 if(p.length<4) continue
 
@@ -24,7 +23,7 @@ lng:parseFloat(p[3])
 
 export default function detectCity(title){
 
-title=title.toLowerCase()
+title = title.toLowerCase()
 
 for(const city of cities){
 
