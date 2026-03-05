@@ -1,11 +1,11 @@
 import fs from "fs"
 
-const cities =
+const cities=
 JSON.parse(fs.readFileSync("./cities.json"))
 
 export function detectCity(title){
 
-const t = title.toLowerCase()
+const t=title.toLowerCase()
 
 for(const c of cities){
 
