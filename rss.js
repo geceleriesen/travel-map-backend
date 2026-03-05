@@ -11,22 +11,20 @@ const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
 
 const feed = await parser.parseURL(url)
 
-const videos = []
+const videos=[]
 
 for(const item of feed.items){
 
-const city = detectCity(item.title)
+const id=item.id.split(":").pop()
+
+const city=detectCity(item.title)
 
 videos.push({
 
-id:item.id.split(":").pop(),
-
+id:id,
 title:item.title,
-
-thumbnail:`https://img.youtube.com/vi/${item.id.split(":").pop()}/hqdefault.jpg`,
-
+thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
 lat:city.lat,
-
 lng:city.lng
 
 })
