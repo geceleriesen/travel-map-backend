@@ -1,7 +1,7 @@
 import cheerio from "cheerio"
-import locate from "./locator.js"
+import detectCity from "./cityDetector.js"
 
-const CHANNEL_URL = "https://www.youtube.com/@ifkoparan/videos"
+const CHANNEL_URL="https://www.youtube.com/@ifkoparan/videos"
 
 export default async function getVideos(){
 
@@ -21,12 +21,16 @@ if(!url) return
 
 const id=url.split("v=")[1]
 
+const city=detectCity(title)
+
 videos.push({
+
 id:id,
 title:title,
 thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
-lat:0,
-lng:0
+lat:city.lat,
+lng:city.lng
+
 })
 
 })
