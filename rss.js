@@ -1,5 +1,5 @@
 import Parser from "rss-parser"
-import locate from "./aiLocator.js"
+import locate from "./locator.js"
 
 const parser = new Parser()
 
