@@ -1,4 +1,4 @@
-import cheerio from "cheerio"
+import * as cheerio from "cheerio"
 import detectCity from "./cityDetector.js"
 
 const CHANNEL_URL="https://www.youtube.com/@ifkoparan/videos"
