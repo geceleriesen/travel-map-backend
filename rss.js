@@ -1,0 +1,38 @@
+import Parser from "rss-parser"
+import detectCity from "./cityDetector.js"
+
+const parser = new Parser()
+
+const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
+
+export default async function getVideos(){
+
+const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
+
+const feed = await parser.parseURL(url)
+
+const videos = []
+
+for(const item of feed.items){
+
+const city = detectCity(item.title)
+
+videos.push({
+
+id:item.id.split(":").pop(),
+
+title:item.title,
+
+thumbnail:`https://img.youtube.com/vi/${item.id.split(":").pop()}/hqdefault.jpg`,
+
+lat:city.lat,
+
+lng:city.lng
+
+})
+
+}
+
+return videos
+
+}
