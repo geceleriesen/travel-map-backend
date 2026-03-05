@@ -1,25 +1,24 @@
-import fs from "fs"
+import cities from "./cities.json" assert { type:"json" }
 
-const cities=
-JSON.parse(fs.readFileSync("./cities.json"))
+export default function detectCity(title){
 
-export function detectCity(title){
+title = title.toLowerCase()
 
-const t=title.toLowerCase()
+for(const city of cities){
 
-for(const c of cities){
+if(title.includes(city.name.toLowerCase())){
 
-if(t.includes(c.name.toLowerCase())){
+return city
+
+}
+
+}
 
 return {
-lat:c.lat,
-lng:c.lng
-}
+
+lat:0,
+lng:0
 
 }
-
-}
-
-return null
 
 }
