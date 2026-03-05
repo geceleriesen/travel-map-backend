@@ -1,24 +1,22 @@
-import fs from "fs"
+import fetch from "node-fetch"
 
-import {detectCity} from "./cityDetector.js"
-import {geocode} from "./geocode.js"
-
-const API = "https://www.googleapis.com/youtube/v3"
+const API="https://www.googleapis.com/youtube/v3"
 
 const API_KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
-
-const CACHE_FILE = "./cache.json"
 
 
 
 async function getUploadsPlaylist(){
 
-const res = await fetch(
+const url =
 `${API}/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
-)
+
+const res = await fetch(url)
 
 const data = await res.json()
+
+if(!data.items) return null
 
 return data.items[0].contentDetails.relatedPlaylists.uploads
 
@@ -26,19 +24,11 @@ return data.items[0].contentDetails.relatedPlaylists.uploads
 
 
 
-export async function getVideos(){
-
-if(fs.existsSync(CACHE_FILE)){
-
-console.log("using cache")
-
-return JSON.parse(fs.readFileSync(CACHE_FILE))
-
-}
-
-console.log("fetching youtube videos")
+export async function getAllVideos(){
 
 const playlist = await getUploadsPlaylist()
+
+if(!playlist) return []
 
 let pageToken=""
 
@@ -46,41 +36,34 @@ const videos=[]
 
 do{
 
-const res = await fetch(
+const url =
 `${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${API_KEY}`
-)
+
+const res = await fetch(url)
 
 const data = await res.json()
 
-data.items.forEach(async v=>{
+if(!data.items) break
 
-const title=v.snippet.title
-const desc=v.snippet.description
-
-const city = detectCity(title+" "+desc)
-
-const coords = await geocode(city)
+for(const v of data.items){
 
 videos.push({
 
-id:v.snippet.resourceId.videoId,
-title,
-location:city,
-lat:coords.lat,
-lng:coords.lng,
-thumbnail:v.snippet.thumbnails.high.url
+id: v.snippet.resourceId.videoId,
+
+title: v.snippet.title,
+
+description: v.snippet.description,
+
+thumbnail: v.snippet.thumbnails.high.url
 
 })
 
-})
+}
 
 pageToken=data.nextPageToken
 
 }while(pageToken)
-
-
-
-fs.writeFileSync(CACHE_FILE,JSON.stringify(videos,null,2))
 
 return videos
 
