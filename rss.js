@@ -17,7 +17,7 @@ for(const item of feed.items){
 
 const id=item.id.split(":").pop()
 
-const city=detectCity(item.title)
+const city = detectCity(item.title)
 
 videos.push({
 
