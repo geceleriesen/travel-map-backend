@@ -6,6 +6,8 @@ const url = `https://www.youtube.com/${channel}/videos`
 
 const html = await fetch(url).then(r=>r.text())
 
+if(!html.includes("ytInitialData")) return []
+
 const json = html.split("var ytInitialData =")[1].split(";</script>")[0]
 
 const data = JSON.parse(json)
