@@ -1,57 +1,90 @@
 import express from "express"
 import cors from "cors"
+import fetch from "node-fetch"
 import fs from "fs"
-
-import {getVideosFromRSS} from "./rss.js"
-import {detectCity} from "./cityDetector.js"
-import {geocode} from "./geocode.js"
+import {parseStringPromise} from "xml2js"
 
 const app = express()
 app.use(cors())
 
 const PORT = process.env.PORT || 10000
-const CACHE="cache.json"
+
+const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
+
+const CACHE_FILE = "cache.json"
 
 
 
-function randomLocation(){
+const CITY_DB = {
+"porto riko":[18.2208,-66.5901],
+"puerto rico":[18.2208,-66.5901],
+"meksika":[23.6345,-102.5528],
+"mexico":[23.6345,-102.5528],
+"kahire":[30.0444,31.2357],
+"cairo":[30.0444,31.2357],
+"mısır":[26.8206,30.8025],
+"egypt":[26.8206,30.8025],
+"malezya":[4.2105,101.9758],
+"malaysia":[4.2105,101.9758],
+"istanbul":[41.0082,28.9784]
+}
 
-return{
-lat:20+(Math.random()*60-30),
-lng:(Math.random()*120-60)
+
+
+function detectLocation(text){
+
+text = text.toLowerCase()
+
+for(const city in CITY_DB){
+
+if(text.includes(city)){
+
+return {
+lat:CITY_DB[city][0],
+lng:CITY_DB[city][1]
 }
 
 }
 
+}
 
-
-async function buildMap(){
-
-const videos = await getVideosFromRSS()
-
-const mapped=[]
-
-for(const v of videos){
-
-let loc = detectCity(v.title)
-
-if(!loc){
-
-loc = await geocode(v.title)
+return null
 
 }
 
-if(!loc){
 
-loc = randomLocation()
 
-}
+async function getVideosFromRSS(){
 
-mapped.push({
+const url =
+`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
 
-id:v.id,
-title:v.title,
-thumbnail:v.thumbnail,
+const xml = await fetch(url).then(r=>r.text())
+
+const data = await parseStringPromise(xml)
+
+const entries = data.feed.entry || []
+
+const videos=[]
+
+for(const e of entries){
+
+const id = e["yt:videoId"][0]
+
+const title = e.title[0]
+
+const thumb =
+`https://img.youtube.com/vi/${id}/hqdefault.jpg`
+
+const loc = detectLocation(title)
+
+if(!loc) continue
+
+videos.push({
+
+id,
+title,
+thumbnail:thumb,
 lat:loc.lat,
 lng:loc.lng
 
@@ -59,29 +92,43 @@ lng:loc.lng
 
 }
 
-return mapped
+return videos
 
 }
 
 
 
-app.get("/api/videos",async(req,res)=>{
+async function buildCache(){
+
+const videos = await getVideosFromRSS()
+
+fs.writeFileSync(
+CACHE_FILE,
+JSON.stringify(videos,null,2)
+)
+
+return videos
+
+}
+
+
+
+app.get("/api/videos", async(req,res)=>{
 
 try{
 
-if(fs.existsSync(CACHE)){
+if(fs.existsSync(CACHE_FILE)){
 
-return res.json(
-JSON.parse(fs.readFileSync(CACHE))
-)
+const cache =
+JSON.parse(fs.readFileSync(CACHE_FILE))
+
+return res.json(cache)
 
 }
 
-const data = await buildMap()
+const videos = await buildCache()
 
-fs.writeFileSync(CACHE,JSON.stringify(data))
-
-res.json(data)
+res.json(videos)
 
 }catch(e){
 
@@ -95,15 +142,13 @@ res.json([])
 
 
 
-app.get("/refresh",async(req,res)=>{
+app.get("/refresh", async(req,res)=>{
 
-const data = await buildMap()
-
-fs.writeFileSync(CACHE,JSON.stringify(data))
+const videos = await buildCache()
 
 res.json({
-status:"updated",
-videos:data.length
+status:"cache updated",
+videos:videos.length
 })
 
 })
@@ -112,11 +157,9 @@ videos:data.length
 
 setInterval(async()=>{
 
-const data = await buildMap()
+await buildCache()
 
-fs.writeFileSync(CACHE,JSON.stringify(data))
-
-console.log("CACHE REFRESHED")
+console.log("cache refreshed")
 
 },6*60*60*1000)
 
@@ -124,6 +167,6 @@ console.log("CACHE REFRESHED")
 
 app.listen(PORT,()=>{
 
-console.log("Travel Map Engine running")
+console.log("Travel Map Backend Running")
 
 })
