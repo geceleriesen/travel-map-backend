@@ -1,5 +1,5 @@
 import Parser from "rss-parser"
-import locate from "./locator.js"
+import locate from "./aiLocator.js"
 
 const parser = new Parser()
 
@@ -7,15 +7,15 @@ const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
 
 export default async function getVideos(){
 
-const feed = await parser.parseURL(
-`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
-)
+const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
+
+const feed = await parser.parseURL(url)
 
 const videos=[]
 
 for(const item of feed.items){
 
-const id=item.id.split(":").pop()
+const id = item.id.split(":").pop()
 
 const loc = await locate(item.title)
 
