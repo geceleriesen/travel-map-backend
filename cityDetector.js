@@ -1,8 +1,8 @@
-import cities from "./cities.json" assert { type:"json" }
+import cities from "./cities.json" assert {type:"json"}
 
 export default function detectCity(title){
 
-title = title.toLowerCase()
+title=title.toLowerCase()
 
 for(const city of cities){
 
