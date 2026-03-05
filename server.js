@@ -6,10 +6,10 @@ import {getChannelVideos} from "./youtube.js"
 import {detectCity} from "./cityDetector.js"
 
 const app = express()
+
 app.use(cors())
 
 const PORT = process.env.PORT || 10000
-
 const CHANNEL = process.env.CHANNEL || "@geceleriesen"
 
 const CACHE="cache.json"
@@ -47,7 +47,7 @@ return result
 
 
 app.get("/",(req,res)=>{
-res.send("Travel Map Backend Running")
+res.send("Backend running")
 })
 
 
@@ -88,23 +88,6 @@ res.json([])
 
 
 
-app.get("/refresh", async(req,res)=>{
-
-const data = await buildMap()
-
-fs.writeFileSync(
-CACHE,
-JSON.stringify(data,null,2)
-)
-
-res.json({
-videos:data.length
-})
-
-})
-
-
-
 app.listen(PORT,()=>{
-console.log("Travel Map Backend Running")
+console.log("Server started")
 })
