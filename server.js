@@ -8,7 +8,7 @@ const app = express()
 app.use(cors())
 
 app.get("/", (req,res)=>{
-res.send("Travel Map Backend Running")
+res.send("Travel Map AI running")
 })
 
 app.get("/api/videos", async (req,res)=>{
@@ -42,5 +42,5 @@ res.json([])
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, ()=>{
-console.log("Server running on", PORT)
+console.log("Server running",PORT)
 })
