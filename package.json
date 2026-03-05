@@ -1,6 +1,6 @@
 {
   "name": "travel-map-backend",
-  "version": "6.1.0",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "express": "^4.19.2",
