@@ -1,5 +1,5 @@
 import Parser from "rss-parser"
-import detectCity from "./cityDetector.js"
+import locate from "./aiLocator.js"
 
 const parser = new Parser()
 
@@ -17,15 +17,15 @@ for(const item of feed.items){
 
 const id=item.id.split(":").pop()
 
-const city = detectCity(item.title)
+const loc = await locate(item.title)
 
 videos.push({
 
 id:id,
 title:item.title,
 thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
-lat:city.lat,
-lng:city.lng
+lat:loc.lat,
+lng:loc.lng
 
 })
 
