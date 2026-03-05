@@ -8,15 +8,15 @@ const cities=[]
 
 for(let i=1;i<lines.length;i++){
 
-const parts=lines[i].split(",")
+const p=lines[i].split(",")
 
-if(parts.length<4) continue
+if(p.length<4) continue
 
 cities.push({
 
-name:parts[0].toLowerCase(),
-lat:parseFloat(parts[2]),
-lng:parseFloat(parts[3])
+name:p[0].toLowerCase(),
+lat:parseFloat(p[2]),
+lng:parseFloat(p[3])
 
 })
 
