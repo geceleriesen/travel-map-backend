@@ -1,73 +1,52 @@
 import express from "express"
 import cors from "cors"
 import fs from "fs"
-import fetch from "node-fetch"
-import { parseStringPromise } from "xml2js"
 
-const app = express()
+import {getChannelVideos} from "./scraper.js"
+import {detectCity} from "./cityDetector.js"
 
+const app=express()
 app.use(cors())
 
-const PORT = process.env.PORT || 10000
-const CHANNEL_ID = process.env.CHANNEL_ID || ""
+const PORT=process.env.PORT || 10000
+const CHANNEL=process.env.CHANNEL || "c/geceleriesen"
 
-const CACHE_FILE = "cache.json"
+const CACHE="cache.json"
 
 
 
-async function getVideos(){
+async function buildMap(){
 
-if(!CHANNEL_ID){
-console.log("CHANNEL_ID missing")
-return []
-}
+const videos = await getChannelVideos(CHANNEL)
 
-const url =
-`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
+const result=[]
 
-try{
+for(const v of videos){
 
-const xml = await fetch(url).then(r=>r.text())
+const loc = detectCity(v.title)
 
-const data = await parseStringPromise(xml)
+if(!loc) continue
 
-const entries = data.feed.entry || []
+result.push({
 
-const videos=[]
+id:v.id,
+title:v.title,
+thumbnail:v.thumbnail,
+lat:loc.lat,
+lng:loc.lng
 
-for(const v of entries){
-
-const id = v["yt:videoId"][0]
-const title = v.title[0]
-
-videos.push({
-id,
-title,
-thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
-lat:20,
-lng:0
 })
 
 }
 
-return videos
-
-}catch(e){
-
-console.log("RSS ERROR",e)
-
-return []
-
-}
+return result
 
 }
 
 
 
 app.get("/",(req,res)=>{
-
-res.send("Travel Map Backend Running")
-
+res.send("Travel Map Backend OK")
 })
 
 
@@ -76,14 +55,25 @@ app.get("/api/videos", async(req,res)=>{
 
 try{
 
-const videos = await getVideos()
+if(fs.existsSync(CACHE)){
+
+const cache =
+JSON.parse(fs.readFileSync(CACHE))
+
+if(cache.length>0){
+return res.json(cache)
+}
+
+}
+
+const data = await buildMap()
 
 fs.writeFileSync(
-CACHE_FILE,
-JSON.stringify(videos,null,2)
+CACHE,
+JSON.stringify(data,null,2)
 )
 
-res.json(videos)
+res.json(data)
 
 }catch(e){
 
@@ -97,8 +87,23 @@ res.json([])
 
 
 
+app.get("/refresh", async(req,res)=>{
+
+const data = await buildMap()
+
+fs.writeFileSync(
+CACHE,
+JSON.stringify(data,null,2)
+)
+
+res.json({
+videos:data.length
+})
+
+})
+
+
+
 app.listen(PORT,()=>{
-
-console.log("Server running on port",PORT)
-
+console.log("Travel Map Backend Running")
 })
