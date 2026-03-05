@@ -13,18 +13,14 @@ const data = await res.json()
 
 if(data.length){
 
-return {
+return{
 lat:parseFloat(data[0].lat),
 lng:parseFloat(data[0].lon)
 }
 
 }
 
-}catch(e){
-
-console.log("GEOCODE ERROR")
-
-}
+}catch(e){}
 
 return null
 
