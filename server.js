@@ -2,14 +2,15 @@ import express from "express"
 import cors from "cors"
 import fs from "fs"
 
-import {getChannelVideos} from "./scraper.js"
+import {getChannelVideos} from "./youtube.js"
 import {detectCity} from "./cityDetector.js"
 
-const app=express()
+const app = express()
 app.use(cors())
 
-const PORT=process.env.PORT || 10000
-const CHANNEL=process.env.CHANNEL || "c/geceleriesen"
+const PORT = process.env.PORT || 10000
+
+const CHANNEL = process.env.CHANNEL || "@geceleriesen"
 
 const CACHE="cache.json"
 
@@ -46,7 +47,7 @@ return result
 
 
 app.get("/",(req,res)=>{
-res.send("Travel Map Backend OK")
+res.send("Travel Map Backend Running")
 })
 
 
