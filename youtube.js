@@ -1,25 +1,18 @@
 import detectCity from "./cityDetector.js"
 
-const PLAYLIST="UUY0fGdQ0mKk2k2gqj6b3F7A"
+const PLAYLIST = "UUY0fGdQ0mKk2k2gqj6b3F7A"
 
 export default async function getVideos(){
 
-let videos=[]
-let pageToken=""
+const url=`https://www.youtube.com/playlist?list=${PLAYLIST}`
 
-while(true){
+const html = await fetch(url).then(r=>r.text())
 
-const url=`https://www.youtube.com/playlist?list=${PLAYLIST}&pbj=1`
+const matches=[...html.matchAll(/"videoId":"(.*?)"/g)]
 
-const res = await fetch(url)
+const videos=[]
 
-const text = await res.text()
-
-const ids=[...text.matchAll(/"videoId":"(.*?)"/g)]
-
-if(!ids.length) break
-
-for(const m of ids){
+for(const m of matches){
 
 const id=m[1]
 
@@ -36,10 +29,6 @@ lat:city.lat,
 lng:city.lng
 
 })
-
-}
-
-break
 
 }
 
