@@ -1,96 +1,71 @@
 import express from "express"
 import cors from "cors"
+import fs from "fs"
+
+import {getAllVideos} from "./youtube.js"
+import {detectCity} from "./cityDetector.js"
+import {geocode} from "./geocode.js"
 
 const app = express()
 app.use(cors())
 
 const PORT = process.env.PORT || 10000
 
-const API = "https://www.googleapis.com/youtube/v3"
-
-const API_KEY = process.env.YOUTUBE_API_KEY
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
+const CACHE_FILE = "cache.json"
 
 
 
-async function getUploadsPlaylist(){
+function randomLocation(){
 
-const url =
-`${API}/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
-
-const res = await fetch(url)
-const data = await res.json()
-
-if(data.error){
-console.log("CHANNEL ERROR:",data.error)
-return null
+return {
+lat:20+(Math.random()*60-30),
+lng:(Math.random()*120-60)
 }
 
-if(!data.items || data.items.length === 0){
-console.log("CHANNEL EMPTY")
-return null
-}
-
-return data.items[0].contentDetails.relatedPlaylists.uploads
 }
 
 
 
-async function fetchVideos(){
+async function buildVideoMap(){
 
-const playlist = await getUploadsPlaylist()
+const videos = await getAllVideos()
 
-if(!playlist){
-console.log("PLAYLIST NOT FOUND")
-return []
+const mapped=[]
+
+for(const v of videos){
+
+let loc =
+detectCity(v.title + " " + v.description)
+
+if(!loc){
+
+loc = await geocode(v.title)
+
 }
 
-let pageToken=""
-const videos=[]
+if(!loc){
 
-do{
+loc = randomLocation()
 
-const url =
-`${API}/playlistItems?part=snippet&maxResults=50&playlistId=${playlist}&pageToken=${pageToken}&key=${API_KEY}`
-
-const res = await fetch(url)
-const data = await res.json()
-
-if(data.error){
-console.log("YOUTUBE ERROR:",data.error)
-break
 }
 
-if(!data.items){
-console.log("NO ITEMS RETURNED")
-break
-}
+mapped.push({
 
-for(const v of data.items){
+id:v.id,
 
-videos.push({
+title:v.title,
 
-id: v.snippet.resourceId.videoId,
+thumbnail:v.thumbnail,
 
-title: v.snippet.title,
+lat:loc.lat,
 
-thumbnail: v.snippet.thumbnails.high.url,
-
-lat: 20 + (Math.random()*40-20),
-
-lng: Math.random()*120-60
+lng:loc.lng
 
 })
 
 }
 
-pageToken = data.nextPageToken
-
-}while(pageToken)
-
-console.log("VIDEOS FOUND:",videos.length)
-
-return videos
+return mapped
 
 }
 
@@ -100,13 +75,29 @@ app.get("/api/videos", async(req,res)=>{
 
 try{
 
-const vids = await fetchVideos()
+if(fs.existsSync(CACHE_FILE)){
 
-res.json(vids)
+console.log("CACHE USED")
 
-}catch(err){
+const cache =
+JSON.parse(fs.readFileSync(CACHE_FILE))
 
-console.log("SERVER ERROR:",err)
+return res.json(cache)
+
+}
+
+const data = await buildVideoMap()
+
+fs.writeFileSync(
+CACHE_FILE,
+JSON.stringify(data)
+)
+
+res.json(data)
+
+}catch(e){
+
+console.log("SERVER ERROR",e)
 
 res.json([])
 
@@ -116,6 +107,26 @@ res.json([])
 
 
 
+app.get("/refresh", async(req,res)=>{
+
+const data = await buildVideoMap()
+
+fs.writeFileSync(
+CACHE_FILE,
+JSON.stringify(data)
+)
+
+res.json({
+status:"updated",
+videos:data.length
+})
+
+})
+
+
+
 app.listen(PORT,()=>{
-console.log("Travel backend running")
+
+console.log("Travel Map Backend Running")
+
 })
