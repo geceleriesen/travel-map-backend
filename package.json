@@ -1,14 +1,14 @@
 {
-"name":"travel-map-backend",
-"version":"1.0.0",
-"type":"module",
-"main":"server.js",
-"scripts":{
-"start":"node server.js"
+"name": "travel-map-backend",
+"version": "1.0.0",
+"type": "module",
+"main": "server.js",
+"scripts": {
+"start": "node server.js"
 },
-"dependencies":{
-"express":"^4.18.2",
-"cors":"^2.8.5",
-"rss-parser":"^3.13.0"
+"dependencies": {
+"express": "^4.18.2",
+"cors": "^2.8.5",
+"rss-parser": "^3.13.0"
 }
 }
