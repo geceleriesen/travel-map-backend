@@ -1,46 +1,74 @@
 import express from "express"
 import cors from "cors"
 import fs from "fs"
-
-import {getChannelVideos} from "./rss.js"
-import {detectCity} from "./cityDetector.js"
+import fetch from "node-fetch"
+import { parseStringPromise } from "xml2js"
 
 const app = express()
 
 app.use(cors())
 
 const PORT = process.env.PORT || 10000
-const CHANNEL = process.env.CHANNEL_ID
+const CHANNEL_ID = process.env.CHANNEL_ID || ""
 
-const CACHE="cache.json"
+const CACHE_FILE = "cache.json"
 
 
 
-async function buildMap(){
+async function getVideos(){
 
-const videos = await getChannelVideos(CHANNEL)
+if(!CHANNEL_ID){
+console.log("CHANNEL_ID missing")
+return []
+}
 
-const result=[]
+const url =
+`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
 
-for(const v of videos){
+try{
 
-const loc = detectCity(v.title)
+const xml = await fetch(url).then(r=>r.text())
 
-if(!loc) continue
+const data = await parseStringPromise(xml)
 
-result.push({
-id:v.id,
-title:v.title,
-thumbnail:v.thumbnail,
-lat:loc.lat,
-lng:loc.lng
+const entries = data.feed.entry || []
+
+const videos=[]
+
+for(const v of entries){
+
+const id = v["yt:videoId"][0]
+const title = v.title[0]
+
+videos.push({
+id,
+title,
+thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+lat:20,
+lng:0
 })
 
 }
 
-return result
+return videos
+
+}catch(e){
+
+console.log("RSS ERROR",e)
+
+return []
 
 }
+
+}
+
+
+
+app.get("/",(req,res)=>{
+
+res.send("Travel Map Backend Running")
+
+})
 
 
 
@@ -48,25 +76,14 @@ app.get("/api/videos", async(req,res)=>{
 
 try{
 
-if(fs.existsSync(CACHE)){
-
-const cache =
-JSON.parse(fs.readFileSync(CACHE))
-
-if(cache.length>0){
-return res.json(cache)
-}
-
-}
-
-const data = await buildMap()
+const videos = await getVideos()
 
 fs.writeFileSync(
-CACHE,
-JSON.stringify(data,null,2)
+CACHE_FILE,
+JSON.stringify(videos,null,2)
 )
 
-res.json(data)
+res.json(videos)
 
 }catch(e){
 
@@ -80,26 +97,8 @@ res.json([])
 
 
 
-app.get("/refresh", async(req,res)=>{
-
-const data = await buildMap()
-
-fs.writeFileSync(
-CACHE,
-JSON.stringify(data,null,2)
-)
-
-res.json({
-status:"updated",
-videos:data.length
-})
-
-})
-
-
-
 app.listen(PORT,()=>{
 
-console.log("Travel Map Backend Running")
+console.log("Server running on port",PORT)
 
 })
