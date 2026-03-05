@@ -1,12 +1,10 @@
 import fetch from "node-fetch"
-import {parseStringPromise} from "xml2js"
+import { parseStringPromise } from "xml2js"
 
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID
-
-export async function getVideosFromRSS(){
+export async function getChannelVideos(channelId){
 
 const url =
-`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
+`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
 
 const xml = await fetch(url).then(r=>r.text())
 
@@ -16,10 +14,10 @@ const entries = data.feed.entry || []
 
 const videos=[]
 
-for(const e of entries){
+for(const v of entries){
 
-const id = e["yt:videoId"][0]
-const title = e.title[0]
+const id = v["yt:videoId"][0]
+const title = v.title[0]
 
 videos.push({
 id,
