@@ -1,36 +1,32 @@
-const express = require("express");
-const cors = require("cors");
+const express=require("express");
+const cors=require("cors");
 
-const { loadCities } = require("./cityDetector");
-const { loadCache } = require("./geoLearner");
-const { getVideos } = require("./youtube");
+const { loadCities }=require("./cityDetector");
+const { loadCache }=require("./geoLearner");
+const { getVideos }=require("./youtube");
 
-const app = express();
+const app=express();
 
-app.use(cors({ origin: "*" }));
+app.use(cors({origin:"*"}));
 
-const PORT = process.env.PORT || 3000;
+const PORT=process.env.PORT||3000;
 
 
-/* health check */
-
-app.get("/", (req,res)=>{
+app.get("/",(req,res)=>{
 
 res.json({
 status:"ok",
-version:"v2"
+version:"v3.2"
 });
 
 });
 
 
-/* video api */
-
-app.get("/videos", async (req,res)=>{
+app.get("/videos",async(req,res)=>{
 
 try{
 
-const videos = await getVideos();
+const videos=await getVideos();
 
 res.json(videos);
 
@@ -38,9 +34,7 @@ res.json(videos);
 
 console.error(err);
 
-res.status(500).json({
-error:"video fetch failed"
-});
+res.status(500).json({error:"video fetch failed"});
 
 }
 
