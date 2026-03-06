@@ -2,8 +2,6 @@ const { resolveLocation } = require("./locationAI");
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
-/* PUT YOUR CHANNEL ID HERE */
-
 const CHANNEL_ID = "UCHut-IQXip7mtXyC3GOiQ1A";
 
 
@@ -33,15 +31,18 @@ thumbnail: v.snippet.thumbnails.high.url
 
 async function getVideos(){
 
-const raw = await fetchChannelVideos();
+const rawVideos = await fetchChannelVideos();
 
-return raw.map(v=>{
+const processed = rawVideos.map(v=>{
+
+/* mevcut location engine */
 
 const loc = resolveLocation(v);
 
 if(!loc){
 
 v.location="Unknown";
+v.country="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
@@ -59,6 +60,8 @@ v.locationType = loc.type;
 return v;
 
 });
+
+return processed;
 
 }
 
