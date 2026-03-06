@@ -1,28 +1,25 @@
-const fs = require("fs");
-const csv = require("csv-parser");
+const fs=require("fs");
+const csv=require("csv-parser");
 
-let cityIndex = {};
+let cityIndex={};
 
-/* words that should never be cities */
-
-const stopWords = new Set([
-"the","and","to","for","with","from","this","that",
-"travel","vlog","trip","tour","video","day","my",
-"your","our","their","holiday","of","in","on","at",
-"march","best","new","first"
+const stopWords=new Set([
+"travel","vlog","trip","tour","video",
+"holiday","best","new","my","your",
+"and","the","of","in","on","at","march"
 ]);
 
 function loadCities(){
 
-return new Promise((resolve)=>{
+return new Promise(resolve=>{
 
 fs.createReadStream("./worldcities.csv")
 .pipe(csv())
 .on("data",(row)=>{
 
-const name = row.city.toLowerCase();
+const name=row.city.toLowerCase();
 
-const cityData = {
+const data={
 city:row.city,
 country:row.country,
 lat:parseFloat(row.lat),
@@ -32,12 +29,14 @@ population:parseInt(row.population)||0
 
 if(!cityIndex[name]){
 
-cityIndex[name] = cityData;
+cityIndex[name]=data;
 
 }else{
 
-if(cityData.population > cityIndex[name].population){
-cityIndex[name] = cityData;
+if(data.population > cityIndex[name].population){
+
+cityIndex[name]=data;
+
 }
 
 }
@@ -58,31 +57,19 @@ resolve();
 
 function detectCity(text){
 
-text = text.toLowerCase();
+text=text.toLowerCase();
 
-const words = text.split(/\s+/);
+const words=text.split(/\s+/);
 
 for(let w of words){
 
-/* clean word */
+w=w.replace(/[^a-z]/g,"");
 
-w = w.replace(/[^a-z]/g,"");
-
-/* skip short words */
-
-if(w.length < 3) continue;
-
-/* skip stop words */
+if(w.length<3) continue;
 
 if(stopWords.has(w)) continue;
 
-/* check city */
-
-if(cityIndex[w]){
-
-return cityIndex[w];
-
-}
+if(cityIndex[w]) return cityIndex[w];
 
 }
 
@@ -90,4 +77,4 @@ return null;
 
 }
 
-module.exports = { loadCities, detectCity };
+module.exports={loadCities,detectCity};
