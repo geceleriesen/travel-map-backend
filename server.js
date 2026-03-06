@@ -7,7 +7,16 @@ const { loadCache } = require("./geoLearner");
 
 const app = express();
 
-app.use(cors());
+/*
+CORS CONFIG
+frontend static.app olduğu için wildcard kullanıyoruz
+*/
+
+app.use(cors({
+origin: "*",
+methods: ["GET"]
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -15,7 +24,6 @@ const PORT = process.env.PORT || 3000;
 
 /*
 TEST VIDEO DATA
-Gerçek projede buraya YouTube API gelecek
 */
 
 let videos = [
@@ -51,12 +59,11 @@ thumbnail:"https://img.youtube.com/vi/abc126/hqdefault.jpg"
 ];
 
 
-
 /*
-API ENDPOINT
+API ROUTE
 */
 
-app.get("/videos", (req,res)=>{
+app.get("/videos",(req,res)=>{
 
 try{
 
@@ -77,9 +84,8 @@ error:"video processing failed"
 });
 
 
-
 /*
-SERVER START
+START SERVER
 */
 
 async function start(){
@@ -90,7 +96,7 @@ console.log("Loading city database...");
 
 await loadCities();
 
-console.log("Loading geo learning cache...");
+console.log("Loading learning cache...");
 
 loadCache();
 
