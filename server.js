@@ -7,24 +7,21 @@ const { loadCache } = require("./geoLearner");
 
 const app = express();
 
-/*
-CORS CONFIG
-frontend static.app olduğu için wildcard kullanıyoruz
-*/
+/* CORS FIX */
 
 app.use(cors({
 origin: "*",
-methods: ["GET"]
+methods: ["GET","POST","OPTIONS"]
 }));
+
+app.options("*", cors());
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
 
-/*
-TEST VIDEO DATA
-*/
+/* TEST DATA */
 
 let videos = [
 
@@ -47,27 +44,20 @@ id:"paris1",
 title:"PARİS GEZİ VLOG",
 description:"fransa paris gezi",
 thumbnail:"https://img.youtube.com/vi/abc125/hqdefault.jpg"
-},
-
-{
-id:"unknown1",
-title:"ÇOK GÜZEL BİR GEZİ",
-description:"harika bir seyahatti",
-thumbnail:"https://img.youtube.com/vi/abc126/hqdefault.jpg"
 }
 
 ];
 
 
-/*
-API ROUTE
-*/
+/* API */
 
 app.get("/videos",(req,res)=>{
 
 try{
 
 const processed = processVideos(videos);
+
+res.setHeader("Access-Control-Allow-Origin","*");
 
 res.json(processed);
 
@@ -84,19 +74,13 @@ error:"video processing failed"
 });
 
 
-/*
-START SERVER
-*/
+/* START */
 
 async function start(){
 
 try{
 
-console.log("Loading city database...");
-
 await loadCities();
-
-console.log("Loading learning cache...");
 
 loadCache();
 
