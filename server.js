@@ -4,28 +4,30 @@ const {processVideos}=require("./youtube");
 
 const app=express();
 
+app.use(express.static("public"));
+
 const PORT=3000;
 
 let videos=[
 
 {
-id:"tokyo1",
-title:"TOKYO STREET FOOD 🇯🇵",
-description:"japonya tokyo street food",
-thumbnail:"https://img.youtube.com/vi/tokyo1/hqdefault.jpg"
-},
-
-{
-id:"paris1",
-title:"PARIS EIFFEL TOWER TRAVEL",
-description:"",
+id:"tokyo",
+title:"TOKYO STREET FOOD",
+description:"japonya tokyo sokak yemekleri gezisi",
 thumbnail:""
 },
 
 {
-id:"saudi1",
-title:"SUUDİ ARABİSTAN ÇÖL GEZİSİ",
-description:"",
+id:"paris",
+title:"PARİS GEZİSİ",
+description:"fransa paris travel vlog",
+thumbnail:""
+},
+
+{
+id:"desert",
+title:"ÇÖL GEZİSİ",
+description:"suudi arabistan riyadh desert",
 thumbnail:""
 }
 
@@ -44,7 +46,7 @@ async function start(){
 await loadCities();
 
 app.listen(PORT,()=>{
-console.log("Server running",PORT);
+console.log("Server running:",PORT);
 });
 
 }
