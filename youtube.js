@@ -1,6 +1,6 @@
 // youtube.js
 
-const { resolveLocation } = require("./locationAI");
+const {resolveLocation}=require("./locationAI");
 
 function processVideos(videos){
 
@@ -14,6 +14,7 @@ v.location="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
+
 return v;
 
 }
