@@ -1,16 +1,13 @@
-// cityDetector.js
+const fs = require("fs");
+const csv = require("csv-parser");
 
-const fs=require("fs");
-const csv=require("csv-parser");
-const {resolveAlias}=require("./cityAliases");
-
-let cityIndex={};
+let cityIndex = {};
 
 function loadCities(){
 
-return new Promise(resolve=>{
+return new Promise((resolve)=>{
 
-fs.createReadStream("worldcities.csv")
+fs.createReadStream("./worldcities.csv")
 .pipe(csv())
 .on("data",(row)=>{
 
@@ -44,10 +41,10 @@ const words=text.split(/\s+/);
 
 for(const w of words){
 
-const city=resolveAlias(w);
+if(cityIndex[w]){
 
-if(cityIndex[city]){
-return cityIndex[city];
+return cityIndex[w];
+
 }
 
 }
