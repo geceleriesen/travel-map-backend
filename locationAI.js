@@ -3,6 +3,7 @@
 const {detectCity}=require("./cityDetector");
 const {detectCountry}=require("./countries");
 const {normalizeTurkish}=require("./turkishNormalizer");
+const {getLearnedLocation,learnLocation}=require("./geoLearner");
 
 const flagMap={
 "🇹🇷":"türkiye",
@@ -27,34 +28,16 @@ return null;
 
 }
 
-function travelParser(text){
-
-const travelWords=[
-"gezisi",
-"gezi",
-"travel",
-"vlog",
-"sokak",
-"street"
-];
-
-for(const w of travelWords){
-
-if(text.includes(w)){
-
-const words=text.split(" ");
-
-return words[0];
-
-}
-
-}
-
-return null;
-
-}
-
 function resolveLocation(video){
+
+// 0 learned location
+
+const learned=getLearnedLocation(video);
+
+if(learned){
+return learned;
+}
+
 
 let text=
 (video.title||"")+
@@ -64,13 +47,13 @@ let text=
 text=normalizeTurkish(text);
 
 
-// city
+// 1 city
 
-let city=detectCity(text);
+const city=detectCity(text);
 
 if(city){
 
-return{
+const result={
 location:city.city,
 country:city.country,
 lat:city.lat,
@@ -78,33 +61,14 @@ lng:city.lng,
 type:"city"
 };
 
-}
+learnLocation(video,result);
 
-
-// travel parser
-
-const guess=travelParser(text);
-
-if(guess){
-
-city=detectCity(guess);
-
-if(city){
-
-return{
-location:city.city,
-country:city.country,
-lat:city.lat,
-lng:city.lng,
-type:"city"
-};
-
-}
+return result;
 
 }
 
 
-// emoji
+// 2 emoji
 
 const flag=detectFlag(text);
 
@@ -114,7 +78,7 @@ const country=detectCountry(flag);
 
 if(country){
 
-return{
+const result={
 location:country.name,
 country:country.name,
 lat:country.lat,
@@ -122,18 +86,22 @@ lng:country.lng,
 type:"country"
 };
 
-}
+learnLocation(video,result);
+
+return result;
 
 }
 
+}
 
-// country
+
+// 3 country
 
 const country=detectCountry(text);
 
 if(country){
 
-return{
+const result={
 location:country.name,
 country:country.name,
 lat:country.lat,
@@ -141,7 +109,12 @@ lng:country.lng,
 type:"country"
 };
 
+learnLocation(video,result);
+
+return result;
+
 }
+
 
 return null;
 
