@@ -35,8 +35,6 @@ const rawVideos = await fetchChannelVideos();
 
 const processed = rawVideos.map(v=>{
 
-/* mevcut location engine */
-
 const loc = resolveLocation(v);
 
 if(!loc){
