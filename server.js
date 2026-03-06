@@ -1,6 +1,8 @@
 const express=require("express");
+
 const {loadCities}=require("./cityDetector");
 const {processVideos}=require("./youtube");
+const {loadCache}=require("./geoLearner");
 
 const app=express();
 
@@ -11,24 +13,21 @@ const PORT=3000;
 let videos=[
 
 {
-id:"1",
+id:"roma1",
 title:"ROMA GEZİSİ",
-description:"italya roma travel vlog",
-thumbnail:""
+description:"italya roma travel vlog"
 },
 
 {
-id:"2",
+id:"tokyo1",
 title:"TOKYO STREET FOOD",
-description:"japonya tokyo sokak yemekleri",
-thumbnail:""
+description:"japonya tokyo sokak yemekleri"
 },
 
 {
-id:"3",
-title:"PARİS GEZİ VLOG",
-description:"fransa paris gezi",
-thumbnail:""
+id:"unknown1",
+title:"ÇOK GÜZEL BİR GEZİ",
+description:"harika bir seyahatti"
 }
 
 ];
@@ -44,6 +43,7 @@ res.json(processed);
 async function start(){
 
 await loadCities();
+loadCache();
 
 app.listen(PORT,()=>{
 console.log("Server running:",PORT);
