@@ -14,7 +14,6 @@ v.location="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
-
 return v;
 
 }
