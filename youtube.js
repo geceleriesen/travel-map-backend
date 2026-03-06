@@ -1,4 +1,3 @@
-const fetch = require("node-fetch");
 const { resolveLocation } = require("./locationAI");
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
@@ -6,12 +5,7 @@ const API_KEY = process.env.YOUTUBE_API_KEY;
 async function fetchTravelVideos(){
 
 const url =
-`https://www.googleapis.com/youtube/v3/search
-?part=snippet
-&q=travel vlog
-&type=video
-&maxResults=50
-&key=${API_KEY}`;
+`https://www.googleapis.com/youtube/v3/search?part=snippet&q=travel%20vlog&type=video&maxResults=25&key=${API_KEY}`;
 
 const res = await fetch(url);
 
