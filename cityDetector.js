@@ -1,47 +1,38 @@
-import detectCity from "./cityDetector.js"
+import fs from "fs"
 
-const API_KEY = process.env.YOUTUBE_API_KEY
-const CHANNEL_ID = "UC6v0Y9lP3Lq6V0Kk9d0PZ1Q"
+const csv = fs.readFileSync("./worldcities.csv","utf8")
+const lines = csv.split("\n")
 
-export default async function getVideos(){
+const cities=[]
 
-let videos=[]
-let nextPage=""
+for(let i=1;i<lines.length;i++){
 
-while(true){
+const p=lines[i].split(",")
 
-const url=`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=50&pageToken=${nextPage}`
+if(p.length<4) continue
 
-const res=await fetch(url)
-const data=await res.json()
+cities.push({
 
-for(const item of data.items){
-
-if(item.id.kind!=="youtube#video") continue
-
-const id=item.id.videoId
-const title=item.snippet.title
-
-const city=detectCity(title)
-
-videos.push({
-
-id,
-title,
-thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
-lat:city.lat,
-lng:city.lng
+name:p[0].toLowerCase(),
+lat:parseFloat(p[2]),
+lng:parseFloat(p[3])
 
 })
 
 }
 
-if(!data.nextPageToken) break
+export default function detectCity(title){
 
-nextPage=data.nextPageToken
+title=title.toLowerCase()
+
+for(const city of cities){
+
+if(title.includes(city.name)){
+return city
+}
 
 }
 
-return videos
+return {lat:0,lng:0}
 
 }
