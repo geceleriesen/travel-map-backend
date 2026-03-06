@@ -56,9 +56,10 @@ return countries[key]
 }
 
 return{
-name:null,
+name:"Unknown",
 lat:null,
 lng:null
+}
 }
 
 }
