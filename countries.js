@@ -1,21 +1,30 @@
-export const countries = {
+const countries = {
+  turkey: { name: "Turkey", lat: 38.9637, lng: 35.2433 },
+  japan: { name: "Japan", lat: 36.2048, lng: 138.2529 },
+  france: { name: "France", lat: 46.2276, lng: 2.2137 },
+  italy: { name: "Italy", lat: 41.8719, lng: 12.5674 },
+  spain: { name: "Spain", lat: 40.4637, lng: -3.7492 },
+  "saudi arabia": { name: "Saudi Arabia", lat: 23.8859, lng: 45.0792 },
+  "united states": { name: "United States", lat: 37.0902, lng: -95.7129 },
+  "united kingdom": { name: "United Kingdom", lat: 55.3781, lng: -3.4360 }
+};
 
-"meksika":{name:"Mexico",lat:23.6,lng:-102.5},
-"mexico":{name:"Mexico",lat:23.6,lng:-102.5},
+function detectCountry(text) {
 
-"mısır":{name:"Egypt",lat:26.8,lng:30.8},
-"egypt":{name:"Egypt",lat:26.8,lng:30.8},
+  const t = text.toLowerCase();
 
-"hindistan":{name:"India",lat:22.3,lng:78.9},
-"india":{name:"India",lat:22.3,lng:78.9},
+  for (const key in countries) {
 
-"malezya":{name:"Malaysia",lat:4.2,lng:102.0},
-"malaysia":{name:"Malaysia",lat:4.2,lng:102.0},
+    if (t.includes(key)) {
+      return countries[key];
+    }
 
-"porto riko":{name:"Puerto Rico",lat:18.22,lng:-66.59},
-"puerto rico":{name:"Puerto Rico",lat:18.22,lng:-66.59},
+  }
 
-"japonya":{name:"Japan",lat:36.2,lng:138.2},
-"japan":{name:"Japan",lat:36.2,lng:138.2}
+  return null;
 
 }
+
+module.exports = {
+  detectCountry
+};
