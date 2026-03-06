@@ -1,52 +1,59 @@
 // cityDetector.js
 
-const fs = require("fs");
-const csv = require("csv-parser");
+const fs=require("fs");
+const csv=require("csv-parser");
+const {resolveAlias}=require("./cityAliases");
 
-let cities = [];
+let cityIndex={};
 
-function loadCities() {
+function loadCities(){
 
-  return new Promise((resolve)=>{
+return new Promise(resolve=>{
 
-    fs.createReadStream("worldcities.csv")
-    .pipe(csv())
-    .on("data",(row)=>{
+fs.createReadStream("worldcities.csv")
+.pipe(csv())
+.on("data",(row)=>{
 
-      cities.push({
-        city: row.city,
-        country: row.country,
-        lat: parseFloat(row.lat),
-        lng: parseFloat(row.lng)
-      });
+const name=row.city.toLowerCase();
 
-    })
-    .on("end",()=>{
-      console.log("Cities loaded:",cities.length);
-      resolve();
-    });
+cityIndex[name]={
+city:row.city,
+country:row.country,
+lat:parseFloat(row.lat),
+lng:parseFloat(row.lng)
+};
 
-  });
+})
+.on("end",()=>{
+
+console.log("Cities indexed:",Object.keys(cityIndex).length);
+
+resolve();
+
+});
+
+});
 
 }
 
 function detectCity(text){
 
-  const t = text.toLowerCase();
+text=text.toLowerCase();
 
-  for(const c of cities){
+const words=text.split(/\s+/);
 
-    if(t.includes(c.city.toLowerCase())){
-      return c;
-    }
+for(const w of words){
 
-  }
+const city=resolveAlias(w);
 
-  return null;
+if(cityIndex[city]){
+return cityIndex[city];
+}
 
 }
 
-module.exports={
-  loadCities,
-  detectCity
-};
+return null;
+
+}
+
+module.exports={loadCities,detectCity};
