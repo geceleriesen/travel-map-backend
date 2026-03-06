@@ -1,13 +1,15 @@
-const fs=require("fs");
-const csv=require("csv-parser");
+const fs = require("fs");
+const csv = require("csv-parser");
 
-let cityIndex={};
+let cityIndex = {};
 
-const stopWords=new Set([
+const stopWords = new Set([
 "travel","vlog","trip","tour","video",
 "holiday","best","new","my","your",
-"and","the","of","in","on","at","march"
+"and","the","of","in","on","at","march",
+"today","explore","street","food"
 ]);
+
 
 function loadCities(){
 
@@ -17,27 +19,23 @@ fs.createReadStream("./worldcities.csv")
 .pipe(csv())
 .on("data",(row)=>{
 
-const name=row.city.toLowerCase();
+const name = row.city.toLowerCase();
 
-const data={
-city:row.city,
-country:row.country,
-lat:parseFloat(row.lat),
-lng:parseFloat(row.lng),
-population:parseInt(row.population)||0
+const data = {
+city: row.city,
+country: row.country,
+lat: parseFloat(row.lat),
+lng: parseFloat(row.lng),
+population: parseInt(row.population) || 0
 };
 
 if(!cityIndex[name]){
 
-cityIndex[name]=data;
+cityIndex[name] = [data];
 
 }else{
 
-if(data.population > cityIndex[name].population){
-
-cityIndex[name]=data;
-
-}
+cityIndex[name].push(data);
 
 }
 
@@ -55,21 +53,49 @@ resolve();
 }
 
 
-function detectCity(text){
+function detectCity(text, countryHint){
 
-text=text.toLowerCase();
+text = text.toLowerCase();
 
-const words=text.split(/\s+/);
+const words = text.split(/\s+/);
 
 for(let w of words){
 
-w=w.replace(/[^a-z]/g,"");
+w = w.replace(/[^a-z]/g,"");
 
-if(w.length<3) continue;
+if(w.length < 3) continue;
 
 if(stopWords.has(w)) continue;
 
-if(cityIndex[w]) return cityIndex[w];
+if(!cityIndex[w]) continue;
+
+
+/* country hint */
+
+if(countryHint){
+
+const match = cityIndex[w].find(
+c => c.country.toLowerCase() === countryHint.toLowerCase()
+);
+
+if(match) return match;
+
+}
+
+
+/* fallback largest population */
+
+let best = null;
+
+cityIndex[w].forEach(c => {
+
+if(!best || c.population > best.population){
+best = c;
+}
+
+});
+
+return best;
 
 }
 
@@ -77,4 +103,4 @@ return null;
 
 }
 
-module.exports={loadCities,detectCity};
+module.exports = { loadCities, detectCity };
