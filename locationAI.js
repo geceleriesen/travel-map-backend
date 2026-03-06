@@ -1,122 +1,77 @@
-const {detectCity}=require("./cityDetector");
-const {detectCountry}=require("./countries");
-const {normalizeTurkish}=require("./turkishNormalizer");
-const {getLearnedLocation,learnLocation}=require("./geoLearner");
-
-const flagMap={
-"🇹🇷":"türkiye",
-"🇯🇵":"japonya",
-"🇫🇷":"fransa",
-"🇮🇹":"italya",
-"🇪🇸":"ispanya",
-"🇸🇦":"suudi arabistan"
-};
-
-function detectFlag(text){
-
-for(const f in flagMap){
-
-if(text.includes(f)){
-return flagMap[f];
-}
-
-}
-
-return null;
-
-}
+const { detectCity } = require("./cityDetector");
+const { detectCountry } = require("./countries");
+const { normalizeTurkish } = require("./turkishNormalizer");
+const { getLearnedLocation, learnLocation } = require("./geoLearner");
 
 
 function resolveLocation(video){
 
-/* 1️⃣ learned cache */
+/* learned cache */
 
-const learned=getLearnedLocation(video);
+const learned = getLearnedLocation(video);
 
 if(learned) return learned;
 
 
-/* TEXT */
+/* combine text */
 
-let text=
-(video.title||"")+
-" "+
-(video.description||"");
+let text =
+(video.title || "") +
+" " +
+(video.description || "");
 
-text=normalizeTurkish(text);
+text = normalizeTurkish(text);
 
 
-/* 2️⃣ CITY DETECTION (MOST ACCURATE) */
+/* detect country */
 
-const city=detectCity(text);
+const country = detectCountry(text);
+
+
+/* detect city with country hint */
+
+const city = detectCity(text, country ? country.name : null);
 
 if(city){
 
-const result={
-location:city.city,
-country:city.country,
-lat:city.lat,
-lng:city.lng,
-type:"city"
+const result = {
+location: city.city,
+country: city.country,
+lat: city.lat,
+lng: city.lng,
+type: "city"
 };
 
-learnLocation(video,result);
+learnLocation(video, result);
 
 return result;
 
 }
 
 
-/* 3️⃣ EMOJI */
-
-const flag=detectFlag(text);
-
-if(flag){
-
-const country=detectCountry(flag);
+/* fallback country */
 
 if(country){
 
-const result={
-location:country.name,
-country:country.name,
-lat:country.lat,
-lng:country.lng,
-type:"country"
+const result = {
+location: country.name,
+country: country.name,
+lat: country.lat,
+lng: country.lng,
+type: "country"
 };
 
-learnLocation(video,result);
+learnLocation(video, result);
 
 return result;
 
 }
 
-}
 
-
-/* 4️⃣ COUNTRY TEXT */
-
-const country=detectCountry(text);
-
-if(country){
-
-const result={
-location:country.name,
-country:country.name,
-lat:country.lat,
-lng:country.lng,
-type:"country"
-};
-
-learnLocation(video,result);
-
-return result;
-
-}
-
+/* ignore video */
 
 return null;
 
 }
 
-module.exports={resolveLocation};
+module.exports = { resolveLocation };
