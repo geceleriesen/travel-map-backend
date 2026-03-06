@@ -12,6 +12,15 @@ app.use(cors({ origin:"*" }));
 const PORT = process.env.PORT || 3000;
 
 
+/* ROOT */
+
+app.get("/", (req,res)=>{
+res.json({status:"ok"});
+});
+
+
+/* VIDEO API */
+
 app.get("/videos", async (req,res)=>{
 
 try{
@@ -24,7 +33,7 @@ res.json(videos);
 
 console.error(err);
 
-res.status(500).json({error:"youtube fetch failed"});
+res.status(500).json({error:"video fetch failed"});
 
 }
 
@@ -40,9 +49,7 @@ await loadCities();
 loadCache();
 
 app.listen(PORT,()=>{
-
 console.log("Server running:",PORT);
-
 });
 
 }
