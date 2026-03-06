@@ -1,66 +1,50 @@
-import fs from "fs"
-import {countries} from "./countries.js"
+const fs = require("fs");
+const csv = require("csv-parser");
 
-const csv = fs.readFileSync("./worldcities.csv","utf8")
+let cities = [];
 
-const lines = csv.split("\n")
+function loadCities() {
 
-const cities=[]
+  return new Promise((resolve) => {
 
-for(let i=1;i<lines.length;i++){
+    fs.createReadStream("worldcities.csv")
+      .pipe(csv())
+      .on("data", (row) => {
 
-const p=lines[i].split(",")
+        cities.push({
+          city: row.city,
+          country: row.country,
+          lat: parseFloat(row.lat),
+          lng: parseFloat(row.lng)
+        });
 
-if(p.length<4) continue
+      })
+      .on("end", () => {
+        console.log("Cities loaded:", cities.length);
+        resolve();
+      });
 
-cities.push({
-
-name:p[0].toLowerCase(),
-lat:parseFloat(p[2]),
-lng:parseFloat(p[3])
-
-})
-
-}
-
-export default function detectCity(title){
-
-title=title.toLowerCase()
-
-// şehir kontrol
-
-for(const city of cities){
-
-if(title.includes(city.name)){
-
-return{
-name:city.name,
-lat:city.lat,
-lng:city.lng
-}
+  });
 
 }
 
-}
+function detectCity(text) {
 
-// ülke fallback
+  const t = text.toLowerCase();
 
-for(const key in countries){
+  for (const c of cities) {
 
-if(title.includes(key)){
+    if (t.includes(c.city.toLowerCase())) {
+      return c;
+    }
 
-return countries[key]
+  }
 
-}
-
-}
-
-return{
-
-name:"Unknown",
-lat:null,
-lng:null
+  return null;
 
 }
 
-}
+module.exports = {
+  loadCities,
+  detectCity
+};
