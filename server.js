@@ -12,14 +12,14 @@ app.use(cors({ origin:"*" }));
 const PORT = process.env.PORT || 3000;
 
 
-/* ROOT */
+/* health */
 
-app.get("/", (req,res)=>{
+app.get("/",(req,res)=>{
 res.json({status:"ok"});
 });
 
 
-/* VIDEO API */
+/* videos */
 
 app.get("/videos", async (req,res)=>{
 
