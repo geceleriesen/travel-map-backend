@@ -1,20 +1,19 @@
 import detectCity from "./cityDetector.js"
 
 const API_KEY = process.env.YOUTUBE_API_KEY
-
-const CHANNEL_ID = "UCvVqEXXv4y0FZ7X4YhY9F7Q"
+const CHANNEL_ID = "UCHut-IQXip7mtXyC3GOiQ1A"
 
 async function getUploadsPlaylist(){
 
-const url=`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
+const url = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`
 
 const res = await fetch(url)
 
 const data = await res.json()
 
-console.log("CHANNEL RESPONSE:",data)
+console.log("CHANNEL API:", data)
 
-if(!data.items || data.items.length===0){
+if(!data.items || data.items.length === 0){
 
 throw new Error("Channel not found")
 
@@ -28,18 +27,20 @@ export default async function getVideos(){
 
 const playlistId = await getUploadsPlaylist()
 
-let videos=[]
-let nextPage=""
+console.log("UPLOAD PLAYLIST:", playlistId)
+
+let videos = []
+let nextPage = ""
 
 while(true){
 
-const url=`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}&pageToken=${nextPage}`
+const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}&pageToken=${nextPage}`
 
 const res = await fetch(url)
 
 const data = await res.json()
 
-console.log("PLAYLIST RESPONSE:",data)
+console.log("PLAYLIST API:", data)
 
 if(!data.items) break
 
@@ -64,11 +65,11 @@ lng:city.lng
 
 if(!data.nextPageToken) break
 
-nextPage=data.nextPageToken
+nextPage = data.nextPageToken
 
 }
 
-console.log("VIDEOS FOUND:",videos.length)
+console.log("VIDEOS FOUND:", videos.length)
 
 return videos
 
