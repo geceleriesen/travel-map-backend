@@ -14,39 +14,70 @@ const res = await fetch(url);
 
 const data = await res.json();
 
-return data.items.map(v => ({
+return data.items.map(v=>({
 
-id: v.id.videoId,
-
-title: v.snippet.title,
-
-description: v.snippet.description,
-
-thumbnail: v.snippet.thumbnails.high.url
+id:v.id.videoId,
+title:v.snippet.title,
+description:v.snippet.description,
+thumbnail:v.snippet.thumbnails.high.url
 
 }));
 
 }
 
 
+async function fetchVideoDetails(ids){
+
+const url =
+`https://www.googleapis.com/youtube/v3/videos?part=recordingDetails&id=${ids.join(",")}&key=${API_KEY}`;
+
+const res = await fetch(url);
+
+const data = await res.json();
+
+return data.items;
+
+}
+
+
 async function getVideos(){
 
-const raw = await fetchChannelVideos();
+const rawVideos = await fetchChannelVideos();
 
-const processed = raw.map(v => {
+const ids = rawVideos.map(v=>v.id);
+
+const details = await fetchVideoDetails(ids);
+
+
+/* attach geotag */
+
+rawVideos.forEach(v=>{
+
+const d = details.find(x=>x.id===v.id);
+
+if(!d) return;
+
+if(d.recordingDetails && d.recordingDetails.location){
+
+v.geotag = {
+
+lat:d.recordingDetails.location.latitude,
+lng:d.recordingDetails.location.longitude
+
+};
+
+}
+
+});
+
+
+/* run location engine */
+
+rawVideos.forEach(v=>{
 
 const loc = resolveLocation(v);
 
-if(!loc){
-
-v.location="Unknown";
-v.lat=null;
-v.lng=null;
-v.locationType="unknown";
-
-return v;
-
-}
+if(loc){
 
 v.location = loc.location;
 v.country = loc.country;
@@ -54,12 +85,32 @@ v.lat = loc.lat;
 v.lng = loc.lng;
 v.locationType = loc.type;
 
-return v;
-
-});
-
-return processed;
+return;
 
 }
 
-module.exports = { getVideos };
+
+/* fallback geotag */
+
+if(v.geotag){
+
+v.lat = v.geotag.lat;
+v.lng = v.geotag.lng;
+v.locationType = "geotag";
+
+return;
+
+}
+
+
+v.lat=null;
+v.lng=null;
+v.locationType="unknown";
+
+});
+
+return rawVideos;
+
+}
+
+module.exports={getVideos};
