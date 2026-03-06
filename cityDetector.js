@@ -13,12 +13,32 @@ fs.createReadStream("./worldcities.csv")
 
 const name=row.city.toLowerCase();
 
-cityIndex[name]={
+const cityData={
 city:row.city,
 country:row.country,
 lat:parseFloat(row.lat),
-lng:parseFloat(row.lng)
+lng:parseFloat(row.lng),
+population:parseInt(row.population)||0
 };
+
+/*
+duplicate city varsa
+en büyük population olanı seç
+*/
+
+if(!cityIndex[name]){
+
+cityIndex[name]=cityData;
+
+}else{
+
+if(cityData.population > cityIndex[name].population){
+
+cityIndex[name]=cityData;
+
+}
+
+}
 
 })
 .on("end",()=>{
