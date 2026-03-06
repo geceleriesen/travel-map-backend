@@ -36,6 +36,8 @@ const title = item.snippet.title
 
 const city = detectCity(title)
 
+if(!city.lat) continue
+
 videos.push({
 
 id,
