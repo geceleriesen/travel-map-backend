@@ -6,10 +6,10 @@ const app = express()
 
 app.use(cors())
 
-let cache = null
+let cache=null
 
-app.get("/", (req,res)=>{
-res.send("Travel Map Backend Running")
+app.get("/",(req,res)=>{
+res.send("Travel Map API running")
 })
 
 app.get("/api/videos", async (req,res)=>{
@@ -25,8 +25,8 @@ const videos = await getVideos()
 cache = videos
 
 setTimeout(()=>{
-cache = null
-}, 1000*60*30)
+cache=null
+},1000*60*30)
 
 res.json(videos)
 
@@ -41,6 +41,6 @@ res.json([])
 
 const PORT = process.env.PORT || 10000
 
-app.listen(PORT, ()=>{
+app.listen(PORT,()=>{
 console.log("Server running",PORT)
 })
