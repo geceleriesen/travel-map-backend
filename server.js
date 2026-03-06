@@ -2,83 +2,38 @@ const express = require("express");
 const cors = require("cors");
 
 const { loadCities } = require("./cityDetector");
-const { processVideos } = require("./youtube");
 const { loadCache } = require("./geoLearner");
+const { getVideos } = require("./youtube");
 
 const app = express();
 
-/* CORS FIX */
-
-app.use(cors({
-origin: "*",
-methods: ["GET","POST","OPTIONS"]
-}));
-
-app.options("*", cors());
-
-app.use(express.json());
+app.use(cors({ origin:"*" }));
 
 const PORT = process.env.PORT || 3000;
 
 
-/* TEST DATA */
-
-let videos = [
-
-{
-id:"roma1",
-title:"ROMA GEZİSİ",
-description:"italya roma travel vlog",
-thumbnail:"https://img.youtube.com/vi/abc123/hqdefault.jpg"
-},
-
-{
-id:"tokyo1",
-title:"TOKYO STREET FOOD",
-description:"japonya tokyo sokak yemekleri",
-thumbnail:"https://img.youtube.com/vi/abc124/hqdefault.jpg"
-},
-
-{
-id:"paris1",
-title:"PARİS GEZİ VLOG",
-description:"fransa paris gezi",
-thumbnail:"https://img.youtube.com/vi/abc125/hqdefault.jpg"
-}
-
-];
-
-
-/* API */
-
-app.get("/videos",(req,res)=>{
+app.get("/videos", async (req,res)=>{
 
 try{
 
-const processed = processVideos(videos);
+const videos = await getVideos();
 
-res.setHeader("Access-Control-Allow-Origin","*");
-
-res.json(processed);
+res.json(videos);
 
 }catch(err){
 
 console.error(err);
 
-res.status(500).json({
-error:"video processing failed"
-});
+res.status(500).json({error:"youtube fetch failed"});
 
 }
 
 });
 
 
-/* START */
-
 async function start(){
 
-try{
+console.log("Loading cities...");
 
 await loadCities();
 
@@ -86,15 +41,9 @@ loadCache();
 
 app.listen(PORT,()=>{
 
-console.log("Server running on port:",PORT);
+console.log("Server running:",PORT);
 
 });
-
-}catch(err){
-
-console.error("Startup error:",err);
-
-}
 
 }
 
