@@ -6,8 +6,6 @@ const { getLearnedLocation, learnLocation } = require("./geoLearner");
 
 function resolveLocation(video){
 
-/* cache */
-
 const learned = getLearnedLocation(video);
 
 if(learned) return learned;
@@ -23,12 +21,12 @@ let text =
 text = normalizeTurkish(text);
 
 
-/* detect country first */
+/* detect country */
 
 const country = detectCountry(text);
 
 
-/* detect city with country hint */
+/* detect city */
 
 const city = detectCity(
 text,
@@ -36,17 +34,17 @@ country ? country.name : null
 );
 
 
-/* city found */
+/* city priority */
 
 if(city){
 
-const result = {
+const result={
 
-location: city.city,
-country: city.country,
-lat: city.lat,
-lng: city.lng,
-type: "city"
+location:city.city,
+country:city.country,
+lat:city.lat,
+lng:city.lng,
+type:"city"
 
 };
 
@@ -61,13 +59,13 @@ return result;
 
 if(country){
 
-const result = {
+const result={
 
-location: country.name,
-country: country.name,
-lat: country.lat,
-lng: country.lng,
-type: "country"
+location:country.name,
+country:country.name,
+lat:country.lat,
+lng:country.lng,
+type:"country"
 
 };
 
@@ -78,10 +76,10 @@ return result;
 }
 
 
-/* ignore */
+/* nothing */
 
 return null;
 
 }
 
-module.exports = { resolveLocation };
+module.exports={resolveLocation};
