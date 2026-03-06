@@ -1,4 +1,4 @@
-import detectCity from "./cityDetector.js"
+import locationAI from "./locationAI.js"
 
 const API_KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL_ID = "UCHut-IQXip7mtXyC3GOiQ1A"
@@ -30,11 +30,7 @@ export default async function getVideos(){
 
 const playlistId = await getUploadsPlaylist()
 
-if(!playlistId){
-
-return []
-
-}
+if(!playlistId) return []
 
 let videos=[]
 let nextPage=""
@@ -59,12 +55,9 @@ for(const item of data.items){
 if(!item.snippet) continue
 
 const id = item.snippet.resourceId.videoId
-
 const title = item.snippet.title
 
-import locationAI from "./locationAI.js"
-
-const city = locationAI(title)
+const loc = locationAI(title)
 
 videos.push({
 
@@ -72,9 +65,9 @@ id:id,
 title:title,
 thumbnail:"https://img.youtube.com/vi/"+id+"/hqdefault.jpg",
 
-lat:city.lat,
-lng:city.lng,
-location:city.name
+lat:loc.lat,
+lng:loc.lng,
+location:loc.name
 
 })
 
