@@ -1,4 +1,5 @@
 const { resolveLocation } = require("./locationAI");
+const { resolveGeo } = require("./geoResolver");
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
@@ -77,37 +78,28 @@ rawVideos.forEach(v=>{
 
 const loc = resolveLocation(v);
 
-if(loc){
+/* NEW RESOLVER */
 
-v.location = loc.location;
-v.country = loc.country;
-v.lat = loc.lat;
-v.lng = loc.lng;
-v.locationType = loc.type;
+const finalLoc = resolveGeo(v,loc);
 
-return;
+if(!finalLoc){
 
-}
-
-
-/* fallback geotag */
-
-if(v.geotag){
-
-v.lat = v.geotag.lat;
-v.lng = v.geotag.lng;
-v.locationType = "geotag";
-
-return;
-
-}
-
-
+v.location="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
+return;
+
+}
+
+v.location=finalLoc.location;
+v.country=finalLoc.country;
+v.lat=finalLoc.lat;
+v.lng=finalLoc.lng;
+v.locationType=finalLoc.type;
 
 });
+
 
 return rawVideos;
 
