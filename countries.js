@@ -1,14 +1,21 @@
 export const countries = {
 
-turkiye:{lat:39.0,lng:35.0},
-mexico:{lat:23.6,lng:-102.5},
-egypt:{lat:26.8,lng:30.8},
-india:{lat:22.3,lng:78.9},
-malaysia:{lat:4.2,lng:102.0},
-puerto:{lat:18.2,lng:-66.5},
-brazil:{lat:-14.2,lng:-51.9},
-thailand:{lat:15.8,lng:100.9},
-japan:{lat:36.2,lng:138.2},
-china:{lat:35.8,lng:104.1}
+"meksika":{name:"Meksika",lat:23.6,lng:-102.5},
+"mexico":{name:"Mexico",lat:23.6,lng:-102.5},
+
+"mısır":{name:"Mısır",lat:26.8,lng:30.8},
+"egypt":{name:"Egypt",lat:26.8,lng:30.8},
+
+"hindistan":{name:"Hindistan",lat:22.3,lng:78.9},
+"india":{name:"India",lat:22.3,lng:78.9},
+
+"malezya":{name:"Malezya",lat:4.2,lng:102.0},
+"malaysia":{name:"Malaysia",lat:4.2,lng:102.0},
+
+"porto riko":{name:"Porto Riko",lat:18.22,lng:-66.59},
+"puerto rico":{name:"Puerto Rico",lat:18.22,lng:-66.59},
+
+"japonya":{name:"Japonya",lat:36.2,lng:138.2},
+"japan":{name:"Japan",lat:36.2,lng:138.2}
 
 }
