@@ -36,7 +36,16 @@ const title = item.snippet.title
 
 const city = detectCity(title)
 
-if(!city.lat) continue
+const city = detectCity(title)
+
+videos.push({
+id,
+title,
+thumbnail:`https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+lat:city.lat,
+lng:city.lng,
+location:city.name
+})
 
 videos.push({
 
