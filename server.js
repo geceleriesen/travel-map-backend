@@ -1,36 +1,47 @@
-import express from "express"
-import cors from "cors"
-import getVideos from "./youtube.js"
+// server.js
 
-const app = express()
+const express = require("express");
+const { loadCities } = require("./cityDetector");
+const { processVideos } = require("./youtube");
 
-app.use(cors())
+const app = express();
 
-console.log("API KEY:", process.env.YOUTUBE_API_KEY)
+const PORT = 3000;
 
-app.get("/",(req,res)=>{
-res.send("Travel Map API running")
-})
+let videos = [
 
-app.get("/api/videos", async (req,res)=>{
+{
+id:"1",
+title:"JAPONYA'DA TOKYO SOKAK YEMEKLERİ 🇯🇵",
+description:"tokyo street food tour",
+thumbnail:""
+},
 
-try{
+{
+id:"2",
+title:"SUUDİ ARABİSTAN ÇÖL GEZİSİ",
+description:"riyadh desert",
+thumbnail:""
+}
 
-const videos = await getVideos()
+];
 
-res.json(videos)
+app.get("/videos",(req,res)=>{
 
-}catch(e){
+  const processed = processVideos(videos);
 
-console.log(e)
-res.json([])
+  res.json(processed);
+
+});
+
+async function start(){
+
+  await loadCities();
+
+  app.listen(PORT,()=>{
+    console.log("Server running:",PORT);
+  });
 
 }
 
-})
-
-const PORT = process.env.PORT || 10000
-
-app.listen(PORT,()=>{
-console.log("Server running",PORT)
-})
+start();
