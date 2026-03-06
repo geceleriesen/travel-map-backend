@@ -7,19 +7,24 @@ const { getVideos } = require("./youtube");
 
 const app = express();
 
-app.use(cors({ origin:"*" }));
+app.use(cors({ origin: "*" }));
 
 const PORT = process.env.PORT || 3000;
 
 
-/* health */
+/* health check */
 
-app.get("/",(req,res)=>{
-res.json({status:"ok"});
+app.get("/", (req,res)=>{
+
+res.json({
+status:"ok",
+version:"v2"
+});
+
 });
 
 
-/* videos */
+/* video api */
 
 app.get("/videos", async (req,res)=>{
 
@@ -33,7 +38,9 @@ res.json(videos);
 
 console.error(err);
 
-res.status(500).json({error:"video fetch failed"});
+res.status(500).json({
+error:"video fetch failed"
+});
 
 }
 
@@ -49,7 +56,9 @@ await loadCities();
 loadCache();
 
 app.listen(PORT,()=>{
+
 console.log("Server running:",PORT);
+
 });
 
 }
