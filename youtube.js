@@ -4,32 +4,30 @@ const { resolveLocation } = require("./locationAI");
 
 function processVideos(videos){
 
-  return videos.map(video=>{
+return videos.map(v=>{
 
-    const loc = resolveLocation(video);
+const loc=resolveLocation(v);
 
-    if(!loc){
+if(!loc){
 
-      video.location="Unknown";
-      video.lat=null;
-      video.lng=null;
-
-      return video;
-
-    }
-
-    video.location = loc.location;
-    video.country = loc.country;
-    video.lat = loc.lat;
-    video.lng = loc.lng;
-    video.locationType = loc.type;
-
-    return video;
-
-  });
+v.location="Unknown";
+v.lat=null;
+v.lng=null;
+v.locationType="unknown";
+return v;
 
 }
 
-module.exports={
-  processVideos
-};
+v.location=loc.location;
+v.country=loc.country;
+v.lat=loc.lat;
+v.lng=loc.lng;
+v.locationType=loc.type;
+
+return v;
+
+});
+
+}
+
+module.exports={processVideos};
