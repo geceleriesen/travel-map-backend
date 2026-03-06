@@ -1,22 +1,26 @@
+// locationAI.js
+
 const { detectCity } = require("./cityDetector");
 const { detectCountry } = require("./countries");
+const { normalizeTurkish } = require("./turkishNormalizer");
 
 const flagMap = {
-  "🇹🇷": "turkey",
-  "🇯🇵": "japan",
-  "🇫🇷": "france",
-  "🇮🇹": "italy",
-  "🇪🇸": "spain",
-  "🇸🇦": "saudi arabia",
-  "🇺🇸": "united states",
-  "🇬🇧": "united kingdom"
+
+  "🇹🇷":"turkey",
+  "🇯🇵":"japan",
+  "🇫🇷":"france",
+  "🇮🇹":"italy",
+  "🇪🇸":"spain",
+  "🇸🇦":"saudi arabia",
+  "🇺🇸":"united states"
+
 };
 
-function detectFlag(text) {
+function detectFlag(text){
 
-  for (const flag in flagMap) {
+  for(const flag in flagMap){
 
-    if (text.includes(flag)) {
+    if(text.includes(flag)){
       return flagMap[flag];
     }
 
@@ -26,17 +30,20 @@ function detectFlag(text) {
 
 }
 
-function resolveLocation(video) {
+function resolveLocation(video){
 
-  const text =
+  let text =
     (video.title || "") +
     " " +
     (video.description || "");
 
-  // city
+  text = normalizeTurkish(text);
+
+  // city detection
+
   const city = detectCity(text);
 
-  if (city) {
+  if(city){
 
     return {
       location: city.city,
@@ -48,36 +55,40 @@ function resolveLocation(video) {
 
   }
 
-  // flag
+  // emoji
+
   const flag = detectFlag(text);
 
-  if (flag) {
+  if(flag){
 
     const country = detectCountry(flag);
 
-    if (country) {
+    if(country){
+
       return {
         location: country.name,
         country: country.name,
         lat: country.lat,
         lng: country.lng,
-        type: "country"
+        type:"country"
       };
+
     }
 
   }
 
-  // country
+  // country detection
+
   const country = detectCountry(text);
 
-  if (country) {
+  if(country){
 
     return {
       location: country.name,
       country: country.name,
       lat: country.lat,
       lng: country.lng,
-      type: "country"
+      type:"country"
     };
 
   }
@@ -86,6 +97,6 @@ function resolveLocation(video) {
 
 }
 
-module.exports = {
+module.exports={
   resolveLocation
 };
