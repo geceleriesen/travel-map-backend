@@ -11,26 +11,14 @@ const url =
 "&key=" + API_KEY
 
 const res = await fetch(url)
-
 const data = await res.json()
 
-if(!data.items || data.items.length === 0){
-
-console.log("Channel not found")
-
-return null
-
-}
-
 return data.items[0].contentDetails.relatedPlaylists.uploads
-
 }
 
 export default async function getVideos(){
 
 const playlistId = await getUploadsPlaylist()
-
-if(!playlistId) return []
 
 let videos=[]
 let nextPage=""
@@ -45,37 +33,37 @@ const url =
 +"&pageToken="+nextPage
 
 const res = await fetch(url)
-
 const data = await res.json()
 
 if(!data.items) break
 
 for(const item of data.items){
 
-if(!item.snippet) continue
-
 const id = item.snippet.resourceId.videoId
 const title = item.snippet.title
 
 const loc = locationAI(title)
 
+// eğer AI bulamazsa bile boş obje dönmesin
+
 videos.push({
 
 id:id,
+
 title:title,
+
 thumbnail:"https://img.youtube.com/vi/"+id+"/hqdefault.jpg",
 
-lat:loc.lat,
-lng:loc.lng,
-location:loc.name
+lat:loc?.lat ?? null,
+lng:loc?.lng ?? null,
+location:loc?.name ?? "Unknown"
 
 })
 
 }
 
 if(!data.nextPageToken) break
-
-nextPage = data.nextPageToken
+nextPage=data.nextPageToken
 
 }
 
