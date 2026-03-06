@@ -43,7 +43,7 @@ lng:city.lng
 
 }
 
-// ülke kontrol
+// ülke fallback
 
 for(const key in countries){
 
@@ -56,10 +56,11 @@ return countries[key]
 }
 
 return{
+
 name:"Unknown",
 lat:null,
 lng:null
-}
+
 }
 
 }
