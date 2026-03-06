@@ -69,15 +69,11 @@ const city = locationAI(title)
 videos.push({
 
 id:id,
-
 title:title,
-
 thumbnail:"https://img.youtube.com/vi/"+id+"/hqdefault.jpg",
 
 lat:city.lat,
-
 lng:city.lng,
-
 location:city.name
 
 })
