@@ -11,23 +11,23 @@ const PORT=3000;
 let videos=[
 
 {
-id:"tokyo",
+id:"1",
+title:"ROMA GEZİSİ",
+description:"italya roma travel vlog",
+thumbnail:""
+},
+
+{
+id:"2",
 title:"TOKYO STREET FOOD",
-description:"japonya tokyo sokak yemekleri gezisi",
+description:"japonya tokyo sokak yemekleri",
 thumbnail:""
 },
 
 {
-id:"paris",
-title:"PARİS GEZİSİ",
-description:"fransa paris travel vlog",
-thumbnail:""
-},
-
-{
-id:"desert",
-title:"ÇÖL GEZİSİ",
-description:"suudi arabistan riyadh desert",
+id:"3",
+title:"PARİS GEZİ VLOG",
+description:"fransa paris gezi",
 thumbnail:""
 }
 
