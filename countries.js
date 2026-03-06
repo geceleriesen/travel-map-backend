@@ -18,14 +18,7 @@ const countries={
 "spain":{name:"Spain",lat:40.4637,lng:-3.7492},
 
 "suudi arabistan":{name:"Saudi Arabia",lat:23.8859,lng:45.0792},
-"saudi arabia":{name:"Saudi Arabia",lat:23.8859,lng:45.0792},
-
-"almanya":{name:"Germany",lat:51.1657,lng:10.4515},
-"germany":{name:"Germany",lat:51.1657,lng:10.4515},
-
-"amerika":{name:"United States",lat:37.0902,lng:-95.7129},
-"abd":{name:"United States",lat:37.0902,lng:-95.7129},
-"united states":{name:"United States",lat:37.0902,lng:-95.7129}
+"saudi arabia":{name:"Saudi Arabia",lat:23.8859,lng:45.0792}
 
 };
 
