@@ -1,5 +1,3 @@
-// locationAI.js
-
 const {detectCity}=require("./cityDetector");
 const {detectCountry}=require("./countries");
 const {normalizeTurkish}=require("./turkishNormalizer");
@@ -28,16 +26,17 @@ return null;
 
 }
 
+
 function resolveLocation(video){
 
-// 0 learned location
+/* 1️⃣ learned cache */
 
 const learned=getLearnedLocation(video);
 
-if(learned){
-return learned;
-}
+if(learned) return learned;
 
+
+/* TEXT */
 
 let text=
 (video.title||"")+
@@ -47,7 +46,7 @@ let text=
 text=normalizeTurkish(text);
 
 
-// 1 city
+/* 2️⃣ CITY DETECTION (MOST ACCURATE) */
 
 const city=detectCity(text);
 
@@ -68,7 +67,7 @@ return result;
 }
 
 
-// 2 emoji
+/* 3️⃣ EMOJI */
 
 const flag=detectFlag(text);
 
@@ -95,7 +94,7 @@ return result;
 }
 
 
-// 3 country
+/* 4️⃣ COUNTRY TEXT */
 
 const country=detectCountry(text);
 
