@@ -1,5 +1,3 @@
-// youtube.js
-
 const {resolveLocation}=require("./locationAI");
 
 function processVideos(videos){
@@ -11,9 +9,11 @@ const loc=resolveLocation(v);
 if(!loc){
 
 v.location="Unknown";
+v.country="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
+
 return v;
 
 }
