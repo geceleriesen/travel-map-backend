@@ -1,3 +1,5 @@
+// cityDetector.js
+
 const fs = require("fs");
 const csv = require("csv-parser");
 
@@ -5,36 +7,36 @@ let cities = [];
 
 function loadCities() {
 
-  return new Promise((resolve) => {
+  return new Promise((resolve)=>{
 
     fs.createReadStream("worldcities.csv")
-      .pipe(csv())
-      .on("data", (row) => {
+    .pipe(csv())
+    .on("data",(row)=>{
 
-        cities.push({
-          city: row.city,
-          country: row.country,
-          lat: parseFloat(row.lat),
-          lng: parseFloat(row.lng)
-        });
-
-      })
-      .on("end", () => {
-        console.log("Cities loaded:", cities.length);
-        resolve();
+      cities.push({
+        city: row.city,
+        country: row.country,
+        lat: parseFloat(row.lat),
+        lng: parseFloat(row.lng)
       });
+
+    })
+    .on("end",()=>{
+      console.log("Cities loaded:",cities.length);
+      resolve();
+    });
 
   });
 
 }
 
-function detectCity(text) {
+function detectCity(text){
 
   const t = text.toLowerCase();
 
-  for (const c of cities) {
+  for(const c of cities){
 
-    if (t.includes(c.city.toLowerCase())) {
+    if(t.includes(c.city.toLowerCase())){
       return c;
     }
 
@@ -44,7 +46,7 @@ function detectCity(text) {
 
 }
 
-module.exports = {
+module.exports={
   loadCities,
   detectCity
 };
