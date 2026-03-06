@@ -10,8 +10,7 @@ const flagMap={
 "🇫🇷":"fransa",
 "🇮🇹":"italya",
 "🇪🇸":"ispanya",
-"🇸🇦":"suudi arabistan",
-"🇺🇸":"amerika"
+"🇸🇦":"suudi arabistan"
 };
 
 function detectFlag(text){
@@ -20,6 +19,33 @@ for(const f in flagMap){
 
 if(text.includes(f)){
 return flagMap[f];
+}
+
+}
+
+return null;
+
+}
+
+function travelParser(text){
+
+const travelWords=[
+"gezisi",
+"gezi",
+"travel",
+"vlog",
+"sokak",
+"street"
+];
+
+for(const w of travelWords){
+
+if(text.includes(w)){
+
+const words=text.split(" ");
+
+return words[0];
+
 }
 
 }
@@ -38,9 +64,9 @@ let text=
 text=normalizeTurkish(text);
 
 
-// CITY
+// city
 
-const city=detectCity(text);
+let city=detectCity(text);
 
 if(city){
 
@@ -55,7 +81,30 @@ type:"city"
 }
 
 
-// EMOJI
+// travel parser
+
+const guess=travelParser(text);
+
+if(guess){
+
+city=detectCity(guess);
+
+if(city){
+
+return{
+location:city.city,
+country:city.country,
+lat:city.lat,
+lng:city.lng,
+type:"city"
+};
+
+}
+
+}
+
+
+// emoji
 
 const flag=detectFlag(text);
 
@@ -78,7 +127,7 @@ type:"country"
 }
 
 
-// COUNTRY
+// country
 
 const country=detectCountry(text);
 
