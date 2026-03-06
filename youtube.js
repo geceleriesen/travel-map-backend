@@ -62,7 +62,9 @@ const id = item.snippet.resourceId.videoId
 
 const title = item.snippet.title
 
-const city = detectCity(title)
+import locationAI from "./locationAI.js"
+
+const city = locationAI(title)
 
 videos.push({
 
