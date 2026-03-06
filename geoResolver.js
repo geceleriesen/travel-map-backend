@@ -1,3 +1,5 @@
+const cities = require("./cityDetector");
+
 function resolveGeo(video, loc){
 
 /* if no NLP result */
@@ -6,14 +8,29 @@ if(!loc){
 
 if(video.geotag){
 
-return {
+const nearest = cities.findNearestCity(
+video.geotag.lat,
+video.geotag.lng
+);
 
-location:"Geotag",
+if(nearest){
+
+return {
+location:nearest.city,
+country:nearest.country,
+lat:video.geotag.lat,
+lng:video.geotag.lng,
+type:"geotag"
+};
+
+}
+
+return {
+location:"Unknown",
 country:"Unknown",
 lat:video.geotag.lat,
 lng:video.geotag.lng,
 type:"geotag"
-
 };
 
 }
@@ -23,7 +40,7 @@ return null;
 }
 
 
-/* if geotag exists check conflict */
+/* conflict check */
 
 if(video.geotag){
 
@@ -31,26 +48,33 @@ const latDiff = Math.abs(loc.lat - video.geotag.lat);
 const lngDiff = Math.abs(loc.lng - video.geotag.lng);
 
 
-/* if difference too large use geotag */
+/* conflict */
 
-if(latDiff > 5 || lngDiff > 5){
+if(latDiff > 10 || lngDiff > 10){
+
+const nearest = cities.findNearestCity(
+video.geotag.lat,
+video.geotag.lng
+);
+
+if(nearest){
 
 return {
-
-location:"Geotag",
-country:"Unknown",
+location:nearest.city,
+country:nearest.country,
 lat:video.geotag.lat,
 lng:video.geotag.lng,
 type:"geotag"
-
 };
 
 }
 
 }
 
+}
 
-/* city result ok */
+
+/* city ok */
 
 return loc;
 
