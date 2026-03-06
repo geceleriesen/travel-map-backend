@@ -104,3 +104,36 @@ return null;
 }
 
 module.exports={loadCities,detectCity};
+function findNearestCity(lat,lng){
+
+let best=null;
+let bestDist=999999;
+
+for(const name in cityIndex){
+
+cityIndex[name].forEach(c=>{
+
+const d =
+Math.abs(c.lat-lat) +
+Math.abs(c.lng-lng);
+
+if(d<bestDist){
+
+bestDist=d;
+best=c;
+
+}
+
+});
+
+}
+
+return best;
+
+}
+
+module.exports={
+loadCities,
+detectCity,
+findNearestCity
+};
