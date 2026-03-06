@@ -1,6 +1,8 @@
 const fs = require("fs");
 const csv = require("csv-parser");
 
+const { resolveAlias } = require("./cityAliases");
+
 let cityIndex = {};
 
 function loadCities(){
@@ -21,21 +23,13 @@ lng:parseFloat(row.lng),
 population:parseInt(row.population)||0
 };
 
-/*
-duplicate city varsa
-en büyük population olanı seç
-*/
-
 if(!cityIndex[name]){
-
 cityIndex[name]=cityData;
-
-}else{
+}
+else{
 
 if(cityData.population > cityIndex[name].population){
-
 cityIndex[name]=cityData;
-
 }
 
 }
@@ -59,12 +53,12 @@ text=text.toLowerCase();
 
 const words=text.split(/\s+/);
 
-for(const w of words){
+for(let w of words){
+
+w = resolveAlias(w);
 
 if(cityIndex[w]){
-
 return cityIndex[w];
-
 }
 
 }
