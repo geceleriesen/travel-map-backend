@@ -1,32 +1,44 @@
-const { resolveLocation } = require("./locationAI");
+const express = require("express");
+const { loadCities } = require("./cityDetector");
+const { processVideos } = require("./youtube");
 
-async function processVideos(videos) {
+const app = express();
+const PORT = 3000;
 
-  return videos.map((video) => {
+let videos = [];
 
-    const loc = resolveLocation(video);
+// example video data
+videos = [
+  {
+    id: "cFMjzdND8-A",
+    title: "DÜNYANIN SONU SUUDİ ARABİSTAN 🇸🇦",
+    description: "",
+    thumbnail: "https://img.youtube.com/vi/cFMjzdND8-A/hqdefault.jpg"
+  },
+  {
+    id: "tokyo123",
+    title: "TOKYO STREET FOOD TOUR 🇯🇵",
+    description: "",
+    thumbnail: ""
+  }
+];
 
-    if (!loc) {
+app.get("/videos", async (req, res) => {
 
-      video.location = "Unknown";
-      video.lat = null;
-      video.lng = null;
+  const processed = await processVideos(videos);
 
-      return video;
+  res.json(processed);
 
-    }
+});
 
-    video.location = loc.location;
-    video.country = loc.country;
-    video.lat = loc.lat;
-    video.lng = loc.lng;
+async function start() {
 
-    return video;
+  await loadCities();
 
+  app.listen(PORT, () => {
+    console.log("Server running on port", PORT);
   });
 
 }
 
-module.exports = {
-  processVideos
-};
+start();
