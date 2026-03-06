@@ -1,7 +1,8 @@
 import detectCity from "./cityDetector.js"
 
 const API_KEY = process.env.YOUTUBE_API_KEY
-const CHANNEL_ID = "UC6v0Y9lP3Lq6V0Kk9d0PZ1Q"
+
+const CHANNEL_ID = "UC0p5p9C6TQ6J9o7y1yZ0B2A"
 
 export default async function getVideos(){
 
@@ -10,19 +11,20 @@ let nextPage=""
 
 while(true){
 
-const url=`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=50&pageToken=${nextPage}`
+const url=`https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId=${CHANNEL_ID}&maxResults=50&order=date&type=video&key=${API_KEY}&pageToken=${nextPage}`
 
-const res=await fetch(url)
-const data=await res.json()
+const res = await fetch(url)
+
+const data = await res.json()
+
+if(!data.items) break
 
 for(const item of data.items){
 
-if(item.id.kind!=="youtube#video") continue
+const id = item.id.videoId
+const title = item.snippet.title
 
-const id=item.id.videoId
-const title=item.snippet.title
-
-const city=detectCity(title)
+const city = detectCity(title)
 
 videos.push({
 
@@ -38,7 +40,7 @@ lng:city.lng
 
 if(!data.nextPageToken) break
 
-nextPage=data.nextPageToken
+nextPage = data.nextPageToken
 
 }
 
