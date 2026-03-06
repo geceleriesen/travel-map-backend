@@ -14,7 +14,7 @@ const res = await fetch(url);
 
 const data = await res.json();
 
-return data.items.map(v=>({
+return data.items.map(v => ({
 
 id: v.id.videoId,
 
@@ -31,16 +31,15 @@ thumbnail: v.snippet.thumbnails.high.url
 
 async function getVideos(){
 
-const rawVideos = await fetchChannelVideos();
+const raw = await fetchChannelVideos();
 
-const processed = rawVideos.map(v=>{
+const processed = raw.map(v => {
 
 const loc = resolveLocation(v);
 
 if(!loc){
 
 v.location="Unknown";
-v.country="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
