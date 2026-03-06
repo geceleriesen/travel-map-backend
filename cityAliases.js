@@ -1,27 +1,26 @@
-// cityAliases.js
+const aliases = {
 
-const aliases={
-
-roma:"rome",
-milano:"milan",
-londra:"london",
-riyad:"riyadh",
-tokyo:"tokyo",
-paris:"paris",
-barselona:"barcelona",
-newyork:"new york",
-losangeles:"los angeles"
+roma: "rome",
+milano: "milan",
+londra: "london",
+riyad: "riyadh",
+pekın: "beijing",
+tokyo: "tokyo",
+paris: "paris",
+barselona: "barcelona"
 
 };
 
-function resolveAlias(city){
+function resolveAlias(word){
 
-city=city.toLowerCase();
+word = word.toLowerCase();
 
-if(aliases[city]) return aliases[city];
+if(aliases[word]){
+return aliases[word];
+}
 
-return city;
+return word;
 
 }
 
-module.exports={resolveAlias};
+module.exports = { resolveAlias };
