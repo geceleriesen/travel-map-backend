@@ -1,26 +1,31 @@
-// server.js
+const express=require("express");
+const {loadCities}=require("./cityDetector");
+const {processVideos}=require("./youtube");
 
-const express = require("express");
-const { loadCities } = require("./cityDetector");
-const { processVideos } = require("./youtube");
+const app=express();
 
-const app = express();
+const PORT=3000;
 
-const PORT = 3000;
-
-let videos = [
+let videos=[
 
 {
-id:"1",
-title:"JAPONYA'DA TOKYO SOKAK YEMEKLERİ 🇯🇵",
-description:"tokyo street food tour",
+id:"tokyo1",
+title:"TOKYO STREET FOOD 🇯🇵",
+description:"japonya tokyo street food",
+thumbnail:"https://img.youtube.com/vi/tokyo1/hqdefault.jpg"
+},
+
+{
+id:"paris1",
+title:"PARIS EIFFEL TOWER TRAVEL",
+description:"",
 thumbnail:""
 },
 
 {
-id:"2",
+id:"saudi1",
 title:"SUUDİ ARABİSTAN ÇÖL GEZİSİ",
-description:"riyadh desert",
+description:"",
 thumbnail:""
 }
 
@@ -28,19 +33,19 @@ thumbnail:""
 
 app.get("/videos",(req,res)=>{
 
-  const processed = processVideos(videos);
+const processed=processVideos(videos);
 
-  res.json(processed);
+res.json(processed);
 
 });
 
 async function start(){
 
-  await loadCities();
+await loadCities();
 
-  app.listen(PORT,()=>{
-    console.log("Server running:",PORT);
-  });
+app.listen(PORT,()=>{
+console.log("Server running",PORT);
+});
 
 }
 
