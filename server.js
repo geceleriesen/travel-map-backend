@@ -6,7 +6,7 @@ const app = express()
 
 app.use(cors())
 
-let cache=null
+console.log("API KEY:", process.env.YOUTUBE_API_KEY)
 
 app.get("/",(req,res)=>{
 res.send("Travel Map API running")
@@ -16,17 +16,7 @@ app.get("/api/videos", async (req,res)=>{
 
 try{
 
-if(cache){
-return res.json(cache)
-}
-
 const videos = await getVideos()
-
-cache = videos
-
-setTimeout(()=>{
-cache=null
-},1000*60*30)
 
 res.json(videos)
 
