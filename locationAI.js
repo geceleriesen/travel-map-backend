@@ -1,49 +1,61 @@
-const countryPatterns = {
+const flagCoords = {
 
-mexico:["meksika","mexico"],
-egypt:["mısır","egypt","kahire","cairo"],
-india:["hindistan","india"],
-malaysia:["malezya","malaysia"],
-puertorico:["porto riko","puerto rico"],
-japan:["japonya","japan"]
+"🇸🇦":{name:"Saudi Arabia",lat:24.7136,lng:46.6753},
+"🇺🇸":{name:"USA",lat:39.8283,lng:-98.5795},
+"🇹🇼":{name:"Taiwan",lat:25.0330,lng:121.5654},
+"🇨🇳":{name:"China",lat:35.8617,lng:104.1954},
+"🇲🇽":{name:"Mexico",lat:23.6345,lng:-102.5528},
+"🇪🇬":{name:"Egypt",lat:26.8206,lng:30.8025},
+"🇲🇾":{name:"Malaysia",lat:4.2105,lng:101.9758},
+"🇵🇷":{name:"Puerto Rico",lat:18.2208,lng:-66.5901},
+"🇮🇳":{name:"India",lat:20.5937,lng:78.9629}
 
 }
 
-const coords = {
+const cityCoords = {
 
-mexico:{lat:23.6,lng:-102.5,name:"Mexico"},
-egypt:{lat:26.8,lng:30.8,name:"Egypt"},
-india:{lat:22.3,lng:78.9,name:"India"},
-malaysia:{lat:4.2,lng:102.0,name:"Malaysia"},
-puertorico:{lat:18.22,lng:-66.59,name:"Puerto Rico"},
-japan:{lat:36.2,lng:138.2,name:"Japan"}
+"riyad":{name:"Riyadh",lat:24.7136,lng:46.6753},
+"new york":{name:"New York",lat:40.7128,lng:-74.0060},
+"dallas":{name:"Dallas",lat:32.7767,lng:-96.7970},
+"albuquerque":{name:"Albuquerque",lat:35.0844,lng:-106.6504},
+"taipei":{name:"Taipei",lat:25.0330,lng:121.5654},
+"şangay":{name:"Shanghai",lat:31.2304,lng:121.4737},
+"shanghai":{name:"Shanghai",lat:31.2304,lng:121.4737}
 
 }
 
 export default function locationAI(title){
 
-title=title.toLowerCase()
+title = title.toLowerCase()
 
-for(const country in countryPatterns){
+// FLAG detection
 
-for(const word of countryPatterns[country]){
+for(const flag in flagCoords){
 
-if(title.includes(word)){
+if(title.includes(flag)){
 
-return coords[country]
-
-}
+return flagCoords[flag]
 
 }
 
 }
 
-return{
+// CITY detection
 
+for(const city in cityCoords){
+
+if(title.includes(city)){
+
+return cityCoords[city]
+
+}
+
+}
+
+return {
 name:null,
 lat:null,
 lng:null
-
 }
 
 }
