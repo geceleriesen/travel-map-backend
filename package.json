@@ -1,7 +1,6 @@
 {
 "name": "travel-map-backend",
 "version": "1.0.0",
-"description": "Travel Map API Backend",
 "main": "server.js",
 "scripts": {
 "start": "node server.js"
