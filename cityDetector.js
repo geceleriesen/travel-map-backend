@@ -7,9 +7,9 @@ const stopWords=new Set([
 "travel","vlog","trip","tour","video",
 "holiday","best","new","my","your",
 "and","the","of","in","on","at","march",
-"today","explore","street","food"
+"today","explore","street","food",
+"asker"
 ]);
-
 
 function loadCities(){
 
@@ -67,9 +67,6 @@ if(stopWords.has(w)) continue;
 
 if(!cityIndex[w]) continue;
 
-
-/* country hint */
-
 if(countryHint){
 
 const match=cityIndex[w].find(
@@ -80,17 +77,12 @@ if(match) return match;
 
 }
 
-
-/* fallback biggest population */
-
 let best=null;
 
 cityIndex[w].forEach(c=>{
 
 if(!best || c.population>best.population){
-
 best=c;
-
 }
 
 });
@@ -103,7 +95,7 @@ return null;
 
 }
 
-module.exports={loadCities,detectCity};
+
 function findNearestCity(lat,lng){
 
 let best=null;
@@ -114,7 +106,7 @@ for(const name in cityIndex){
 cityIndex[name].forEach(c=>{
 
 const d =
-Math.abs(c.lat-lat) +
+Math.abs(c.lat-lat)+
 Math.abs(c.lng-lng);
 
 if(d<bestDist){
