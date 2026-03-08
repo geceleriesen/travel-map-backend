@@ -43,28 +43,24 @@ return data.items;
 
 async function getVideos(){
 
-const rawVideos = await fetchChannelVideos();
+const rawVideos=await fetchChannelVideos();
 
-const ids = rawVideos.map(v=>v.id);
+const ids=rawVideos.map(v=>v.id);
 
-const details = await fetchVideoDetails(ids);
+const details=await fetchVideoDetails(ids);
 
-
-/* attach geotag */
 
 rawVideos.forEach(v=>{
 
-const d = details.find(x=>x.id===v.id);
+const d=details.find(x=>x.id===v.id);
 
 if(!d) return;
 
 if(d.recordingDetails && d.recordingDetails.location){
 
-v.geotag = {
-
+v.geotag={
 lat:d.recordingDetails.location.latitude,
 lng:d.recordingDetails.location.longitude
-
 };
 
 }
@@ -72,19 +68,16 @@ lng:d.recordingDetails.location.longitude
 });
 
 
-/* run location engine */
-
 rawVideos.forEach(v=>{
 
-const loc = resolveLocation(v);
+const loc=resolveLocation(v);
 
-/* NEW RESOLVER */
-
-const finalLoc = resolveGeo(v,loc);
+const finalLoc=resolveGeo(v,loc);
 
 if(!finalLoc){
 
 v.location="Unknown";
+v.country="Unknown";
 v.lat=null;
 v.lng=null;
 v.locationType="unknown";
@@ -99,7 +92,6 @@ v.lng=finalLoc.lng;
 v.locationType=finalLoc.type;
 
 });
-
 
 return rawVideos;
 
