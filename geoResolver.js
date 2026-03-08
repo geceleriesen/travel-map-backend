@@ -1,14 +1,14 @@
-const cities = require("./cityDetector");
+const { findNearestCity } = require("./cityDetector");
 
 function resolveGeo(video, loc){
 
-/* if no NLP result */
+/* no NLP result */
 
 if(!loc){
 
 if(video.geotag){
 
-const nearest = cities.findNearestCity(
+const nearest = findNearestCity(
 video.geotag.lat,
 video.geotag.lng
 );
@@ -47,12 +47,9 @@ if(video.geotag){
 const latDiff = Math.abs(loc.lat - video.geotag.lat);
 const lngDiff = Math.abs(loc.lng - video.geotag.lng);
 
-
-/* conflict */
-
 if(latDiff > 10 || lngDiff > 10){
 
-const nearest = cities.findNearestCity(
+const nearest = findNearestCity(
 video.geotag.lat,
 video.geotag.lng
 );
@@ -73,11 +70,8 @@ type:"geotag"
 
 }
 
-
-/* city ok */
-
 return loc;
 
 }
 
-module.exports={resolveGeo};
+module.exports = { resolveGeo };
